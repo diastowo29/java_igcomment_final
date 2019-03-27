@@ -170,7 +170,7 @@ public class ThreadingTicket extends Thread {
 					long diffDays = diff / (24 * 60 * 60 * 1000);
 
 					/* System.out.println(diffDays); */
-					if (diffDays <= 2) {
+					if (diffDays <= 3) {
 						System.out.println("===== NEW ARRAY IS COMMING =====");
 						String parentMedia = allMedia.getJSONArray("data").getJSONObject(i).getString("id") + "-"
 								+ accountId;
