@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Admin | Instagram</title>
+<link href="/webjars/bootstrap/3.3.6/css/bootstrap.min.css"
+	rel="stylesheet">
+</head>
+<body>
+	<div class="row" style="padding: 20px;">
+		<div class="col-12" align="center">
+			<button type="submit" class="btn btn-primary" value="testing"
+				th:onclick="@{'popup(\'' + ${appId} + '\',\'' + ${appSecret} + '\')'}">Login
+				with Facebook</button>
+		</div>
+	</div>
+	<script src="/webjars/jquery/1.9.1/jquery.min.js"></script>
+	<script src="/webjars/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<script>
+		function popup(appId, appSecret) {
+			window
+					.open(
+							"https://www.facebook.com/v3.0/dialog/oauth?client_id="
+									+ appId
+									+ "&redirect_uri=https://java-cif-instagram.herokuapp.com/instagram/callback&state={\"appId\":\""
+									+ appId
+									+ "\", \"appSecret\":\""
+									+ appSecret
+									+ "\"}&scope=manage_pages%2Cpublish_pages%2Cinstagram_basic%2Cinstagram_manage_comments",
+							'window', 'width=600,height=400');
+			// window.open("http://localhost:5000/instagram/callback?code=123", 'window', 'width=600,height=400');
+		}
+
+		function CallParent(code, appId, appSecret) {
+			console.log("parent called");
+			window.open("./submit?token=" + code + "&appId=" + appId
+					+ "&appSecret=" + appSecret, "_self");
+		}
+	</script>
+</body>
+</html>

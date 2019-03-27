@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Accounts | Instagram</title>
+<link href="/webjars/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+	<div class="container">
+		<div class="row" style="padding: 40px;">
+			<div class="col-12 mainDivIgName" align="center">
+				<p>Select your account..</p>
+				<div class="list-group" th:each="namelist : ${igList}">
+					<a th:href="@{'submittoken?getId=' + ${namelist.id} + '&name=' + ${namelist.name} + '&token=' + ${namelist.token}} + '&option=1'" class="list-group-item" th:id="${namelist.id}" th:text="${namelist.name}"></a>
+				</div>
+			</div>
+			<div>
+				<div class="radio">
+				  <label><input type="radio" name="optradio" value="test1" onclick="changeOption(1)" checked>1 Post 1 Ticket</label>
+				</div>
+				<div class="radio">
+				  <label><input type="radio" name="optradio" value="test2" onclick="changeOption(2)">1 Comment 1 Ticket</label>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="/webjars/jquery/1.9.1/jquery.min.js"></script>
+	<script src="/webjars/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<script type="text/javascript">
+	
+		function changeOption (option) {
+			$('.mainDivIgName > div').each(function () {
+		        var href = $($(this).first()[0]).children()[0].id;
+		        var _href = $("#" + href).attr("href");
+		        console.log(href);
+				if (_href.indexOf('&option') == -1) {
+					$("#" + href).attr("href", _href + "&option=" + option);
+				} else {
+					$("#" + href).attr("href", _href.slice(0, _href.indexOf("&option")) + "&option=" + option);
+				}
+		      });
+		}
+	</script>
+</body>
+</html>

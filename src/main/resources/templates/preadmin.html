@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Admin | Instagram</title>
+<link href="/webjars/bootstrap/3.3.6/css/bootstrap.min.css"
+	rel="stylesheet">
+</head>
+<body>
+	<div class="row" style="padding: 20px;">
+		<form action="admin" method="post">
+			<div class="form-group">
+				<label for="usr">App ID:</label> <input type="text"
+					class="form-control" name="appId" placeholder="Input App ID here.."
+					value="">
+			</div>
+			<div class="form-group">
+				<label for="pwd">App Secret:</label> <input type="password"
+					class="form-control" name="appSecret"
+					placeholder="Input App Secret here.."
+					value="">
+			</div>
+			<button type="submit" class="btn btn-success">
+				<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+				Next
+			</button>
+		</form>
+	</div>
+	<!-- <div id="fb-root"></div>
+	<script>(function(d, s, id) {
+	  var js, fjs = d.getElementsByTagName(s)[0];
+	  if (d.getElementById(id)) return;
+	  js = d.createElement(s); js.id = id;
+	  js.src = 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2&appId=336527970496185&autoLogAppEvents=1';
+	  fjs.parentNode.insertBefore(js, fjs);
+	}(document, 'script', 'facebook-jssdk'));</script>
+	
+	<div class="row" style="padding: 20px;">
+		<div class="fb-login-button" data-max-rows="1" data-size="large" data-button-type="continue_with" data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="false"></div>
+		<fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+</fb:login-button>
+	</div>-->
+	<script src="/webjars/jquery/1.9.1/jquery.min.js"></script>
+	<script src="/webjars/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</body>
+<!-- <script type="text/javascript">
+FB.login(function(response) {
+    if (response.authResponse) {
+     console.log('Welcome!  Fetching your information.... ');
+     FB.api('/me', function(response) {
+       console.log('Good to see you, ' + response.name + '.');
+     });
+    } else {
+     console.log('User cancelled login or did not fully authorize.');
+    }
+});
+</script> -->
+</html>

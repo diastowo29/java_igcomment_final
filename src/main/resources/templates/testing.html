@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Accounts | Instagram</title>
+<link href="/webjars/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+	<div class="container">
+		<div class="row" style="padding: 40px;">
+			<div class="col-12" align="center">
+				<p>Select your account..</p>
+				<div class="list-group" th:each="namelist : ${namelist}">
+					<a th:href="@{'submittoken?getId=' + ${namelist.id}}" class="list-group-item" th:text="${namelist.name}"></a>
+				</div>
+				<button onclick="openPop();">Open Pop Up</button>
+			</div>
+		</div>
+	</div>
+	<script src="/webjars/jquery/1.9.1/jquery.min.js"></script>
+	<script src="/webjars/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<script type="text/javascript">
+		function openPop() {
+			window.open("http://localhost:5000/instagram/callback?code=345", 'window', 'width=600,height=400');
+		}
+		
+		function CallParent(code){
+			alert("halo child" + code);
+		}
+	</script>
+</body>
+</html>

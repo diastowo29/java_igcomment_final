@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Accounts | Instagram</title>
+<link href="/webjars/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+	<div class="container">
+		<div class="row" style="padding: 40px;">
+			<div class="col-12" align="center">
+				<p>Confirm your account..</p>
+				<form th:action="${metadata.returnUrl}" method="post">
+					<input type="text" class="form-control" name="name" th:value="${metadata.name}" readonly="true">
+					<input type="hidden" class="form-control" name="metadata" th:value="${metadata.metadata}" hidden="true">
+					<input type="hidden" class="form-control" name="state" th:value="${metadata.state}" hidden="true">
+					<button type="submit" class="btn btn-primary" style="margin-top: 20px;">Submit</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	<script src="/webjars/jquery/1.9.1/jquery.min.js"></script>
+	<script src="/webjars/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</body>
+</html>
