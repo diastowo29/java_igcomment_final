@@ -190,6 +190,8 @@ public class Instagram {
 		List<DataEntry> willbeDelete = new ArrayList<>();
 		boolean alreadyFull = false;
 		int extCounter = 0;
+		
+		System.out.println(dataRepo.count());
 
 		for (int i = 0; i < dataEntry.size(); i++) {
 			/*
@@ -236,8 +238,6 @@ public class Instagram {
 		for (int i = 0; i < willbeDelete.size(); i++) {
 			dataRepo.delete(willbeDelete.get(i));
 		}
-		
-		System.out.println(dataRepo.count());
 
 		ThreadingTicket ticketThread = new ThreadingTicket(accountId, token, option, flagRepo, lastRepo, dataRepo,
 				intervalRepo);
