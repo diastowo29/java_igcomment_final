@@ -236,6 +236,8 @@ public class Instagram {
 		for (int i = 0; i < willbeDelete.size(); i++) {
 			dataRepo.delete(willbeDelete.get(i));
 		}
+		
+		System.out.println(dataRepo.count());
 
 		ThreadingTicket ticketThread = new ThreadingTicket(accountId, token, option, flagRepo, lastRepo, dataRepo,
 				intervalRepo);
