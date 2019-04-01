@@ -41,7 +41,7 @@ public class Main implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		// commentRepo.deleteAll();
-		intervalRepo.deleteAll();
-		intervalRepo.save(new Interval(0, "17841402968277029", 2));
+//		intervalRepo.deleteAll();
+//		intervalRepo.save(new Interval(0, "17841402968277029", 2));
 	}
 }
