@@ -199,9 +199,9 @@ public class Instagram {
 			 */
 			@SuppressWarnings("unchecked")
 			ArrayList<Object> cifJsonData = gson.fromJson(dataEntry.get(i).getCifJsonData(), ArrayList.class);
-			System.out.println("cifJsonData: " + cifJsonData.size() + " extCounter: " + extCounter
-					+ " extResource length: " + extResource.size() + " extResoruceRest: " + extResourceRest.size()
-					+ " Data ID: " + dataEntry.get(i).getCifPostId());
+//			System.out.println("cifJsonData: " + cifJsonData.size() + " extCounter: " + extCounter
+//					+ " extResource length: " + extResource.size() + " extResoruceRest: " + extResourceRest.size()
+//					+ " Data ID: " + dataEntry.get(i).getCifPostId());
 			if (!alreadyFull) {
 				for (int j = 0; j < cifJsonData.size(); j++) {
 					if (extCounter >= 199) {

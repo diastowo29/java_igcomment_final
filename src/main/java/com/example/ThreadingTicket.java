@@ -402,7 +402,7 @@ public class ThreadingTicket extends Thread {
 				Date commentDate = sdf.parse(dateValidate);
 				long diffComment = (commentDate.getTime() - (lastRun));
 				long diffCommentSeconds = diffComment / (1000);
-				System.out.println("DIFFERENCE SECONDS: " + diffCommentSeconds);
+//				System.out.println("DIFFERENCE SECONDS: " + diffCommentSeconds);
 				if (diffCommentSeconds > -120) {
 					continueExt = true;
 				}
