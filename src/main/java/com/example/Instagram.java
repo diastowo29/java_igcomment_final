@@ -236,10 +236,14 @@ public class Instagram {
 		for (int i = 0; i < willbeDelete.size(); i++) {
 			dataRepo.delete(willbeDelete.get(i));
 		}
-
-		ThreadingTicket ticketThread = new ThreadingTicket(accountId, token, option, flagRepo, lastRepo, dataRepo,
-				intervalRepo);
-		ticketThread.start();
+		
+		if (dataRepo.count() <= 2) {
+			ThreadingTicket ticketThread = new ThreadingTicket(accountId, token, option, flagRepo, lastRepo, dataRepo,
+					intervalRepo);
+			ticketThread.start();	
+		} else {
+			System.out.println("===== still too many rows at DB =====");
+		}
 
 		return new ResponseEntity<Object>(response, HttpStatus.OK);
 	}
