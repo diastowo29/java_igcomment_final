@@ -223,15 +223,6 @@ public class Instagram {
 					willbeDelete.add(dataEntry.get(i));
 				}
 			}
-
-			/*
-			 * JSONArray dataArray = new JSONArray(dataEntry.get(i).getCifJsonData());
-			 * jsonToArray = new ArrayList<>(); for (int j = 0; j < dataArray.length(); j++)
-			 * { jsonToArray.add(dataArray.getJSONObject(j)); } if (extResource.size() +
-			 * jsonToArray.size() >= 199) { break; } else { for (int j = 0; j <
-			 * jsonToArray.size(); j++) { extResource.add(jsonToArray.get(j)); }
-			 * willbeDelete.add(dataEntry.get(i)); }
-			 */
 		}
 		response.put("external_resources", extResource);
 
