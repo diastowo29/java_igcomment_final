@@ -83,9 +83,13 @@ public class ThreadingTicket extends Thread {
 						lastRepo.save(new LastEntry(lastEntry.getId(), accountId, new Date().getTime()));
 						flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0));
 					} else {
-						flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY,
-								(flagging.getCifInterval() + 1)));
-						System.out.println("===== WAIT FOR INTERVAL: " + (flagging.getCifInterval() + 1) + " =====");
+						if (flagging.getCifInterval() > 2) {
+							flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 2));
+						} else {
+							flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY,
+									(flagging.getCifInterval() + 1)));
+							System.out.println("===== WAIT FOR INTERVAL: " + (flagging.getCifInterval() + 1) + " =====");	
+						}
 					}
 				} else {
 					System.out.println("===== PLEASE WAIT, ITS STILL RUNNING =====");
@@ -374,11 +378,11 @@ public class ThreadingTicket extends Thread {
 				}
 			}
 
-			if (tooMuchComment) {
+			/*if (tooMuchComment) {
 				intervalRepo.save(new Interval(interval.getId(), interval.getCifAccountId(), ent.defaultInterval + 3));
 			} else {
 				intervalRepo.save(new Interval(interval.getId(), interval.getCifAccountId(), ent.defaultInterval));
-			}
+			}*/
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} catch (ParseException e) {

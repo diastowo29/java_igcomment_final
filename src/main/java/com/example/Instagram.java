@@ -194,11 +194,7 @@ public class Instagram {
 		System.out.println(dataRepo.count());
 
 		for (int i = 0; i < dataEntry.size(); i++) {
-			/*
-			 * ArrayList<Object> newArray = new
-			 * ArrayList<>(Arrays.asList(dataEntry.get(i).getCifJsonData()));
-			 * System.out.println("=== testing ==="); System.out.println(newArray);
-			 */
+			
 			@SuppressWarnings("unchecked")
 			ArrayList<Object> cifJsonData = gson.fromJson(dataEntry.get(i).getCifJsonData(), ArrayList.class);
 			System.out.println("cifJsonData: " + cifJsonData.size() + " extCounter: " + extCounter
