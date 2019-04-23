@@ -59,25 +59,41 @@
 	</style>
 </head>
 <body>
-	<div>
-		<button class="loginBtn loginBtn--facebook" th:onclick="@{'goPopUp(\'' + ${appId} + '\',\'' + ${appSecret} + '\',\'' + ${callbackUrl} + '\')'}">
+	<div class="row" style="padding: 20px;">
+		<div class="form-group">
+			<label for="usr">App ID:</label> <input id="appId" type="text"
+				class="form-control" name="appId" placeholder="Input App ID here.."
+				value="">
+		</div>
+		<div class="form-group">
+			<label for="pwd">App Secret:</label> <input id="appSecret" type="password"
+				class="form-control" name="appSecret"
+				placeholder="Input App Secret here.."
+				value="">
+		</div>
+		
+		<button class="loginBtn loginBtn--facebook" th:onclick="@{'goPopUp(\'' + ${callbackUrl} + '\')'}">
 		  Login with Facebook
 		</button>
 	</div>
 </body>
 <script type="text/javascript">
+	var newAppId = "";
 	var newAppSecret = "";
 	
-	function goPopUp(appId, appSecret, callbackUrl){
-		newAppSecret = appSecret;
-		window.open("https://www.facebook.com/v3.2/dialog/oauth?client_id=" + appId
-				+ "&redirect_uri=" + callbackUrl + "&state=%7B%22%7Bst"
+	function goPopUp(callbackUrl){
+		newAppId = document.getElementById('appId').value;
+		newAppSecret = document.getElementById('appSecret').value;
+		
+		window.open("https://www.facebook.com/v3.2/dialog/oauth?client_id=" + newAppId
+				+ "&redirect_uri=" + callbackUrl + "&state={\"appId\":\""
+				+ newAppId + "\", \"appSecret\":\"" + newAppSecret + "\"}"
 				+ "&scope=manage_pages,publish_pages,instagram_basic,instagram_manage_comments,pages_show_list", 
 				'window', 'width=600,height=400');
 	}
 	
 	function CallParent(code, appId, appSecret) {
-		window.open("./submit?token=" + code + "&appId=" + appId
+		window.open("../submit?token=" + code + "&appId=" + appId
 				+ "&appSecret=" + newAppSecret, "_self");
 	}
 </script>
