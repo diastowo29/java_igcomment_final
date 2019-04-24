@@ -133,13 +133,19 @@ public class Instagram {
 	String finalSubmit(@RequestParam(name = "getId") String igId, @RequestParam(name = "name") String igName,
 			@RequestParam(name = "token") String igToken, @RequestParam(name = "option") String option, Model model) {
 		System.out.println("/submittoken");
-		HashMap<String, String> hashMap = new HashMap<>();
+		HashMap<String, String> hashMap = new HashMap<>();		
 		hashMap.put("returnUrl", RETURNURL);
 		System.out.println("RETURN URL: " + RETURNURL);
 		hashMap.put("igId", igId);
 		System.out.println("igName: " + igName);
+		
+		
 		try {
-			hashMap.put("name", "Instagram - " + URLDecoder.decode(igName, "UTF-8"));
+			if (option.equals("1")) {
+				hashMap.put("name", "Instagram - " + URLDecoder.decode(igName, "UTF-8") + " - Post to Ticket");
+			} else {
+				hashMap.put("name", "Instagram - " + URLDecoder.decode(igName, "UTF-8") + " - Comment to Ticket");
+			}
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
