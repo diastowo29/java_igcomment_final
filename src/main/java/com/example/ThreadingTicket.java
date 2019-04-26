@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -74,7 +75,7 @@ public class ThreadingTicket extends Thread {
 					} else {
 						intv = interval.getCifInterval();
 					}
-					if (flagging.getCifInterval() == intv) {
+					if (flagging.getCifInterval() == 1) {
 						flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.WAIT, 0));
 						LastEntry lastEntry = lastRepo.findByCifAccountId(accountId);
 						lastRun = lastEntry.getCifLastEntry();
@@ -239,6 +240,10 @@ public class ThreadingTicket extends Thread {
 										allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("comments")
 												.getJSONArray("data").getJSONObject(j).getString("timestamp"),
 										lastRun);
+								
+								System.out.println(allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("comments")
+												.getJSONArray("data").getJSONObject(j));
+								System.out.println("continueExt: " + continueExt);
 
 								extResource = extractData(allMedia, i, mediaJson, j, displayObject, displayInfo,
 										displayArray, fieldsArray, tagsArray, author, option, accountId, extObj,
@@ -401,8 +406,19 @@ public class ThreadingTicket extends Thread {
 			} else {
 				Date commentDate = sdf.parse(dateValidate);
 				long diffComment = (commentDate.getTime() - (lastRun));
+
+				System.out.println(commentDate);
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTimeInMillis(lastRun);
+
+				int mYear = calendar.get(Calendar.YEAR);
+				int mMonth = calendar.get(Calendar.MONTH);
+				int mDay = calendar.get(Calendar.DAY_OF_MONTH);
+				System.out.println(mDay + " - " + mMonth + " - " + mYear + " - " + calendar.get(Calendar.HOUR) + " - "
+						+ calendar.get(Calendar.MINUTE) + " - " + calendar.get(Calendar.PM));
+
 				long diffCommentSeconds = diffComment / (1000);
-//				System.out.println("DIFFERENCE SECONDS: " + diffCommentSeconds);
+				System.out.println("DIFFERENCE SECONDS: " + diffCommentSeconds);
 				if (diffCommentSeconds > -120) {
 					continueExt = true;
 				}
