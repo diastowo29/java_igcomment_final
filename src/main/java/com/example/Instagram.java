@@ -61,6 +61,15 @@ public class Instagram {
 		return "preadmin";
 	}
 
+	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+			MediaType.APPLICATION_JSON_UTF8_VALUE }, produces = { MediaType.APPLICATION_ATOM_XML_VALUE,
+					MediaType.APPLICATION_JSON_UTF8_VALUE })
+	String indexPost(@RequestParam Map<String, String> paramMap, Model model) {
+		RETURNURL = paramMap.get("return_url");
+		model.addAttribute("callbackUrl", entity.CALLBACKURL);
+		return "preadmin";
+	}
+
 	/* HANDLE POST REQUEST FROM VIEW, see preadmin.html */
 	@PostMapping(value = "/admin", consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE,
 			MediaType.APPLICATION_JSON_UTF8_VALUE }, produces = { MediaType.APPLICATION_ATOM_XML_VALUE,
@@ -70,16 +79,6 @@ public class Instagram {
 		model.addAttribute("appId", appId);
 		model.addAttribute("appSecret", appSecret);
 		return "admin";
-	}
-
-	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-			MediaType.APPLICATION_JSON_UTF8_VALUE }, produces = { MediaType.APPLICATION_ATOM_XML_VALUE,
-					MediaType.APPLICATION_JSON_UTF8_VALUE })
-	String indexPost(@RequestParam Map<String, String> paramMap) {
-		System.out.println("/post");
-		RETURNURL = paramMap.get("return_url");
-		System.out.println(RETURNURL);
-		return "preadmin";
 	}
 
 	@RequestMapping("/getToken/")
@@ -139,8 +138,13 @@ public class Instagram {
 		System.out.println("RETURN URL: " + RETURNURL);
 		hashMap.put("igId", igId);
 		System.out.println("igName: " + igName);
+		
 		try {
-			hashMap.put("name", "Instagram - " + URLDecoder.decode(igName, "UTF-8"));
+			if (option.equals("1")) {
+				hashMap.put("name", "Instagram - " + URLDecoder.decode(igName, "UTF-8") + " - Post to Ticket");
+			} else {
+				hashMap.put("name", "Instagram - " + URLDecoder.decode(igName, "UTF-8") + " - Comment to Ticket");
+			}
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
@@ -199,9 +203,9 @@ public class Instagram {
 			 */
 			@SuppressWarnings("unchecked")
 			ArrayList<Object> cifJsonData = gson.fromJson(dataEntry.get(i).getCifJsonData(), ArrayList.class);
-			System.out.println("cifJsonData: " + cifJsonData.size() + " extCounter: " + extCounter
-					+ " extResource length: " + extResource.size() + " extResoruceRest: " + extResourceRest.size()
-					+ " Data ID: " + dataEntry.get(i).getCifPostId());
+//			System.out.println("cifJsonData: " + cifJsonData.size() + " extCounter: " + extCounter
+//					+ " extResource length: " + extResource.size() + " extResoruceRest: " + extResourceRest.size()
+//					+ " Data ID: " + dataEntry.get(i).getCifPostId());
 			if (!alreadyFull) {
 				for (int j = 0; j < cifJsonData.size(); j++) {
 					if (extCounter >= 199) {
@@ -213,7 +217,7 @@ public class Instagram {
 					}
 				}
 				if (extResourceRest.size() > 0) {
-					System.out.println("===== UPDATE DB WITH ID: " + dataEntry.get(i).getId() + " =====");
+//					System.out.println("===== UPDATE DB WITH ID: " + dataEntry.get(i).getId() + " =====");
 					doSaveDataEntryDb(dataEntry.get(i).getId(), dataEntry.get(i).getCifAccountId(),
 							dataEntry.get(i).getCifPostId(), extResourceRest);
 					extResourceRest = new ArrayList<>();
@@ -236,10 +240,14 @@ public class Instagram {
 		for (int i = 0; i < willbeDelete.size(); i++) {
 			dataRepo.delete(willbeDelete.get(i));
 		}
-
-		ThreadingTicket ticketThread = new ThreadingTicket(accountId, token, option, flagRepo, lastRepo, dataRepo,
-				intervalRepo);
-		ticketThread.start();
+		
+		if (dataRepo.count() <= 2) {
+			ThreadingTicket ticketThread = new ThreadingTicket(accountId, token, option, flagRepo, lastRepo, dataRepo,
+					intervalRepo);
+			ticketThread.start();	
+		} else {
+			System.out.println("===== still too many rows at DB =====");
+		}
 
 		return new ResponseEntity<Object>(response, HttpStatus.OK);
 	}
