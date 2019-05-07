@@ -30,7 +30,7 @@ public class ThreadingTicket extends Thread {
 	LastEntryRepository lastRepo;
 	DataEntryRepository dataRepo;
 	IntervalRepository intervalRepo;
-	
+
 	boolean tooMuchComment = false;
 
 	public ThreadingTicket(String accountId, String token, String option, FlagRepository flagRepo,
@@ -78,8 +78,10 @@ public class ThreadingTicket extends Thread {
 						flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.WAIT, 0));
 						LastEntry lastEntry = lastRepo.findByCifAccountId(accountId);
 						lastRun = lastEntry.getCifLastEntry();
+
 						gettingEntry(FlagStatus.PROCESSED, "0", lastRun, flagging.getId(), flagging.getCifAccountId(),
 								interval, false);
+
 						lastRepo.save(new LastEntry(lastEntry.getId(), accountId, new Date().getTime()));
 						flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0));
 					} else {
@@ -88,7 +90,8 @@ public class ThreadingTicket extends Thread {
 						} else {
 							flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY,
 									(flagging.getCifInterval() + 1)));
-							System.out.println("===== WAIT FOR INTERVAL: " + (flagging.getCifInterval() + 1) + " =====");	
+							System.out
+									.println("===== WAIT FOR INTERVAL: " + (flagging.getCifInterval() + 1) + " =====");
 						}
 					}
 				} else {
@@ -378,11 +381,12 @@ public class ThreadingTicket extends Thread {
 				}
 			}
 
-			/*if (tooMuchComment) {
-				intervalRepo.save(new Interval(interval.getId(), interval.getCifAccountId(), ent.defaultInterval + 3));
-			} else {
-				intervalRepo.save(new Interval(interval.getId(), interval.getCifAccountId(), ent.defaultInterval));
-			}*/
+			/*
+			 * if (tooMuchComment) { intervalRepo.save(new Interval(interval.getId(),
+			 * interval.getCifAccountId(), ent.defaultInterval + 3)); } else {
+			 * intervalRepo.save(new Interval(interval.getId(), interval.getCifAccountId(),
+			 * ent.defaultInterval)); }
+			 */
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} catch (ParseException e) {
@@ -405,7 +409,7 @@ public class ThreadingTicket extends Thread {
 				Date commentDate = sdf.parse(dateValidate);
 				long diffComment = (commentDate.getTime() - (lastRun));
 				long diffCommentSeconds = diffComment / (1000);
-//				System.out.println("DIFFERENCE SECONDS: " + diffCommentSeconds);
+				// System.out.println("DIFFERENCE SECONDS: " + diffCommentSeconds);
 				if (diffCommentSeconds > -120) {
 					continueExt = true;
 				}
