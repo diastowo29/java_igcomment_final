@@ -25,7 +25,8 @@ public class HitApi {
 				System.out.println("HTTP ERROR:");
 				System.out.println(conn.getResponseMessage());
 				response = null;
-//				throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
+				// throw new RuntimeException("Failed : HTTP error code : " +
+				// conn.getResponseCode());
 			}
 			System.out.println("Output from Server .... \n");
 			BufferedReader rd = new BufferedReader(
@@ -37,15 +38,18 @@ public class HitApi {
 
 		} catch (MalformedURLException e) {
 
-			e.printStackTrace();
+			// e.printStackTrace();
+			System.out.println(e.getLocalizedMessage());
 
 		} catch (IOException e) {
 
-			e.printStackTrace();
+			// e.printStackTrace();
+			System.out.println(e.getLocalizedMessage());
 
 		} catch (JSONException e) {
 
-			e.printStackTrace();
+			// e.printStackTrace();
+			System.out.println(e.getLocalizedMessage());
 
 		}
 
