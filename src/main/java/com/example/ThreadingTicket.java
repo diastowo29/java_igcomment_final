@@ -100,12 +100,12 @@ public class ThreadingTicket extends Thread {
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				// e.printStackTrace();
-				e.getCause();
+				e.getLocalizedMessage();
 				flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0));
 			} catch (NullPointerException e) {
 				// TODO Auto-generated catch block
 				// e.printStackTrace();
-				e.getCause();
+				e.getLocalizedMessage();
 				flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0));
 			}
 		}
