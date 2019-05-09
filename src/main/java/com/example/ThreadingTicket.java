@@ -419,7 +419,7 @@ public class ThreadingTicket extends Thread {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-		return true;
+		return continueExt;
 		// return true;
 	}
 
