@@ -39,17 +39,17 @@ public class HitApi {
 		} catch (MalformedURLException e) {
 
 			// e.printStackTrace();
-			System.out.println(e.getLocalizedMessage());
+//			System.out.println(e.getLocalizedMessage());
 
 		} catch (IOException e) {
 
 			// e.printStackTrace();
-			System.out.println(e.getLocalizedMessage());
+//			System.out.println(e.getLocalizedMessage());
 
 		} catch (JSONException e) {
 
 			// e.printStackTrace();
-			System.out.println(e.getLocalizedMessage());
+//			System.out.println(e.getLocalizedMessage());
 
 		}
 
