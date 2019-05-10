@@ -428,7 +428,6 @@ public class ThreadingTicket extends Thread {
 			e.printStackTrace();
 		}
 		return continueExt;
-		// return true;
 	}
 
 	public JSONObject getPaging(String url, long flagId, String flagAccountId) {
