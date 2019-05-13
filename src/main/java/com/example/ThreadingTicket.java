@@ -101,15 +101,7 @@ public class ThreadingTicket extends Thread {
 				} else {
 					System.out.println("===== PLEASE WAIT, ITS STILL RUNNING =====");
 				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				// e.printStackTrace();
-				e.getLocalizedMessage();
-				flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0,
-						flagging.getCifDayLimit()));
-			} catch (NullPointerException e) {
-				// TODO Auto-generated catch block
-				// e.printStackTrace();
+			} catch (Exception e) {
 				e.getLocalizedMessage();
 				flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0,
 						flagging.getCifDayLimit()));
