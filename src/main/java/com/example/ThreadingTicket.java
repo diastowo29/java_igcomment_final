@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -418,6 +419,17 @@ public class ThreadingTicket extends Thread {
 			} else {
 				Date commentDate = sdf.parse(dateValidate);
 				long diffComment = (commentDate.getTime() - (lastRun));
+
+				System.out.println(commentDate);
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTimeInMillis(lastRun);
+				/*
+				 * int mYear = calendar.get(Calendar.YEAR); int mMonth =
+				 * calendar.get(Calendar.MONTH); int mDay = calendar.get(Calendar.DAY_OF_MONTH);
+				 * System.out.println(mDay + " - " + mMonth + " - " + mYear + " - " +
+				 * calendar.get(Calendar.HOUR) + " - " + calendar.get(Calendar.MINUTE) + " - " +
+				 * calendar.get(Calendar.PM));
+				 */
 				long diffCommentSeconds = diffComment / (1000);
 				// System.out.println("DIFFERENCE SECONDS: " + diffCommentSeconds);
 				if (diffCommentSeconds > -120) {
