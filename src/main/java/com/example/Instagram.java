@@ -190,13 +190,11 @@ public class Instagram {
 		List<DataEntry> willbeDelete = new ArrayList<>();
 		boolean alreadyFull = false;
 		int extCounter = 0;
+		
+		System.out.println(dataRepo.count());
 
 		for (int i = 0; i < dataEntry.size(); i++) {
-			/*
-			 * ArrayList<Object> newArray = new
-			 * ArrayList<>(Arrays.asList(dataEntry.get(i).getCifJsonData()));
-			 * System.out.println("=== testing ==="); System.out.println(newArray);
-			 */
+			
 			@SuppressWarnings("unchecked")
 			ArrayList<Object> cifJsonData = gson.fromJson(dataEntry.get(i).getCifJsonData(), ArrayList.class);
 //			System.out.println("cifJsonData: " + cifJsonData.size() + " extCounter: " + extCounter
@@ -221,15 +219,6 @@ public class Instagram {
 					willbeDelete.add(dataEntry.get(i));
 				}
 			}
-
-			/*
-			 * JSONArray dataArray = new JSONArray(dataEntry.get(i).getCifJsonData());
-			 * jsonToArray = new ArrayList<>(); for (int j = 0; j < dataArray.length(); j++)
-			 * { jsonToArray.add(dataArray.getJSONObject(j)); } if (extResource.size() +
-			 * jsonToArray.size() >= 199) { break; } else { for (int j = 0; j <
-			 * jsonToArray.size(); j++) { extResource.add(jsonToArray.get(j)); }
-			 * willbeDelete.add(dataEntry.get(i)); }
-			 */
 		}
 		response.put("external_resources", extResource);
 
@@ -242,7 +231,7 @@ public class Instagram {
 					intervalRepo);
 			ticketThread.start();	
 		} else {
-			System.out.println("===== still too many rows at DB =====");
+			System.out.println("===== Still too many rows at DB =====");
 		}
 
 		return new ResponseEntity<Object>(response, HttpStatus.OK);
