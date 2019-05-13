@@ -61,7 +61,6 @@ public class ThreadingTicket extends Thread {
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				// e1.printStackTrace();
-				System.out.println("IOEXCEPTION 64");
 				flagRepo.save(new Flag(flagging.getId(), accountId, FlagStatus.READY, 0, flagging.getCifDayLimit()));
 			}
 		} else {
@@ -130,11 +129,6 @@ public class ThreadingTicket extends Thread {
 		HashMap<String, Object> extObj = new HashMap<>();
 		ArrayList<Object> extResource = new ArrayList<>();
 
-		/*
-		 * String igId = "17841402968277029"; String igToken =
-		 * "EAAED7idudXkBAF0vzCX1rZCq8JYZBGLZBOpZBxa1u05kc7r5FgWpKi46qmMHZBzDMWqsQmwRBfhyHKcahB9f3PdWddwRGBrHJQg1ppMnkblUO2iQxZB0CyZCHA7fg1tGa0g9Y03eA8DZCGbH6tKyb2omDknjZCAKxJqsZD";
-		 * String option = "2"; System.out.println(paramMap.get("metadata").toString());
-		 */
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -175,7 +169,6 @@ public class ThreadingTicket extends Thread {
 					 */
 					long diffDays = diff / (24 * 60 * 60 * 1000);
 
-					/* System.out.println(diffDays); */
 					if (diffDays <= flagDayLimit) {
 						System.out.println("===== NEW ARRAY IS COMMING =====");
 						String parentMedia = allMedia.getJSONArray("data").getJSONObject(i).getString("id") + "-"
@@ -253,11 +246,6 @@ public class ThreadingTicket extends Thread {
 									doSaveDb(0, accountId,
 											allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
 											extResource);
-									/*
-									 * dataRepo.save(new DataEntry(0, accountId,
-									 * allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
-									 * extResource));
-									 */
 									extResource = new ArrayList<>();
 								}
 							}
@@ -285,11 +273,6 @@ public class ThreadingTicket extends Thread {
 												doSaveDb(0, accountId,
 														allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
 														extResource);
-												/*
-												 * dataRepo.save(new DataEntry(0, accountId,
-												 * allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
-												 * extResource));
-												 */
 												extResource = new ArrayList<>();
 											}
 										}
@@ -318,11 +301,6 @@ public class ThreadingTicket extends Thread {
 																	0, accountId, allMedia.getJSONArray("data")
 																			.getJSONObject(i).getString("id"),
 																	extResource);
-															/*
-															 * dataRepo.save(new DataEntry(0, accountId,
-															 * allMedia.getJSONArray("data").getJSONObject(i).getString(
-															 * "id"), extResource));
-															 */
 															extResource = new ArrayList<>();
 														}
 													}
@@ -353,20 +331,11 @@ public class ThreadingTicket extends Thread {
 							doSaveDb(0, accountId, allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
 									extResource);
 							extResource = new ArrayList<>();
-							/*
-							 * dataRepo.save(new DataEntry(dataEntry.getId(), accountId,
-							 * allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
-							 * extResource));
-							 */
+							
 						} catch (NullPointerException e) {
 							doSaveDb(0, accountId, allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
 									extResource);
 							extResource = new ArrayList<>();
-							/*
-							 * dataRepo.save(new DataEntry(0, accountId,
-							 * allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
-							 * extResource));
-							 */
 						}
 					} else {
 						thatsAll = true;
