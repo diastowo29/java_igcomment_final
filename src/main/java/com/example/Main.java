@@ -21,7 +21,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import com.example.model.Interval;
 import com.example.repo.CommentRepository;
 import com.example.repo.IntervalRepository;
 
@@ -30,7 +29,7 @@ public class Main implements CommandLineRunner {
 
 	@Autowired
 	CommentRepository commentRepo;
-	
+
 	@Autowired
 	IntervalRepository intervalRepo;
 
@@ -41,7 +40,7 @@ public class Main implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		// commentRepo.deleteAll();
-//		intervalRepo.deleteAll();
-//		intervalRepo.save(new Interval(0, "17841402968277029", 2));
+		// intervalRepo.deleteAll();
+		// intervalRepo.save(new Interval(0, "17841402968277029", 2));
 	}
 }

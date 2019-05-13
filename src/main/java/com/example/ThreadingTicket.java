@@ -58,12 +58,13 @@ public class ThreadingTicket extends Thread {
 			lastRepo.save(new LastEntry(0, accountId, new Date().getTime()));
 			try {
 				gettingEntry(FlagStatus.INIT, "0", new Date().getTime(), flagging.getId(), flagging.getCifAccountId(),
-						interval, false);
-				flagRepo.save(new Flag(flagging.getId(), accountId, FlagStatus.READY, 0));
+						interval, false, flagging.getCifDayLimit());
+				flagRepo.save(new Flag(flagging.getId(), accountId, FlagStatus.READY, 0, flagging.getCifDayLimit()));
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				flagRepo.save(new Flag(flagging.getId(), accountId, FlagStatus.READY, 0));
+				// e1.printStackTrace();
+				System.out.println("IOEXCEPTION 65");
+				flagRepo.save(new Flag(flagging.getId(), accountId, FlagStatus.READY, 0, flagging.getCifDayLimit()));
 			}
 		} else {
 			try {
@@ -76,29 +77,43 @@ public class ThreadingTicket extends Thread {
 						intv = interval.getCifInterval();
 					}
 					if (flagging.getCifInterval() == intv) {
-						flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.WAIT, 0));
+						flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.WAIT, 0,
+								flagging.getCifDayLimit()));
 						LastEntry lastEntry = lastRepo.findByCifAccountId(accountId);
 						lastRun = lastEntry.getCifLastEntry();
+
 						gettingEntry(FlagStatus.PROCESSED, "0", lastRun, flagging.getId(), flagging.getCifAccountId(),
-								interval, false);
+								interval, false, flagging.getCifDayLimit());
+
 						lastRepo.save(new LastEntry(lastEntry.getId(), accountId, new Date().getTime()));
-						flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0));
+						flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0,
+								flagging.getCifDayLimit()));
 					} else {
-						flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY,
-								(flagging.getCifInterval() + 1)));
-						System.out.println("===== WAIT FOR INTERVAL: " + (flagging.getCifInterval() + 1) + " =====");
+						if (flagging.getCifInterval() > 2) {
+							flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 2,
+									flagging.getCifDayLimit()));
+						} else {
+							flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY,
+									(flagging.getCifInterval() + 1), flagging.getCifDayLimit()));
+							System.out
+									.println("===== WAIT FOR INTERVAL: " + (flagging.getCifInterval() + 1) + " =====");
+						}
 					}
 				} else {
 					System.out.println("===== PLEASE WAIT, ITS STILL RUNNING =====");
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
-				flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0));
+				// e.printStackTrace();
+				e.getLocalizedMessage();
+				flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0,
+						flagging.getCifDayLimit()));
 			} catch (NullPointerException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
-				flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0));
+				// e.printStackTrace();
+				e.getLocalizedMessage();
+				flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0,
+						flagging.getCifDayLimit()));
 			}
 		}
 
@@ -107,12 +122,12 @@ public class ThreadingTicket extends Thread {
 	}
 
 	public Flag newAccountFlag(String accountId) {
-		Flag flagging = flagRepo.save(new Flag(0, accountId, FlagStatus.WAIT, 0));
+		Flag flagging = flagRepo.save(new Flag(0, accountId, FlagStatus.WAIT, 0, 3));
 		return flagging;
 	}
 
 	public void gettingEntry(FlagStatus flagStatus, String nextUrl, long lastRun, long flagId, String flagAccountId,
-			Interval interval, boolean tooMuchComment) throws IOException {
+			Interval interval, boolean tooMuchComment, int flagDayLimit) throws IOException {
 		HitApi calling = new HitApi();
 		Entity ent = new Entity();
 		JSONObject allMedia = new JSONObject();
@@ -143,7 +158,7 @@ public class ThreadingTicket extends Thread {
 				allMedia = calling.hit(apiUrl, "GET");
 			} catch (RuntimeException e) {
 				e.printStackTrace();
-				flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.READY, 0));
+				flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.READY, 0, flagDayLimit));
 			}
 
 			if (allMedia.has("data")) {
@@ -171,8 +186,7 @@ public class ThreadingTicket extends Thread {
 					long diffDays = diff / (24 * 60 * 60 * 1000);
 
 					/* System.out.println(diffDays); */
-
-					if (diffDays <= 2) {
+					if (diffDays <= flagDayLimit) {
 						System.out.println("===== NEW ARRAY IS COMMING =====");
 						String parentMedia = allMedia.getJSONArray("data").getJSONObject(i).getString("id") + "-"
 								+ accountId;
@@ -324,13 +338,15 @@ public class ThreadingTicket extends Thread {
 													}
 												} catch (RuntimeException e) {
 													e.printStackTrace();
-													flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.READY, 0));
+													flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.READY, 0,
+															flagDayLimit));
 												}
 											}
 										}
 									} catch (RuntimeException e) {
 										e.printStackTrace();
-										flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.READY, 0));
+										flagRepo.save(
+												new Flag(flagId, flagAccountId, FlagStatus.READY, 0, flagDayLimit));
 									}
 								}
 							}
@@ -371,16 +387,17 @@ public class ThreadingTicket extends Thread {
 				if (allMedia.has("paging")) {
 					if (allMedia.getJSONObject("paging").has("next")) {
 						gettingEntry(flagStatus, allMedia.getJSONObject("paging").getString("next"), lastRun, flagId,
-								flagAccountId, interval, tooMuchComment);
+								flagAccountId, interval, tooMuchComment, flagDayLimit);
 					}
 				}
 			}
 
-			if (tooMuchComment) {
-				intervalRepo.save(new Interval(interval.getId(), interval.getCifAccountId(), ent.defaultInterval + 3));
-			} else {
-				intervalRepo.save(new Interval(interval.getId(), interval.getCifAccountId(), ent.defaultInterval));
-			}
+			/*
+			 * if (tooMuchComment) { intervalRepo.save(new Interval(interval.getId(),
+			 * interval.getCifAccountId(), ent.defaultInterval + 3)); } else {
+			 * intervalRepo.save(new Interval(interval.getId(), interval.getCifAccountId(),
+			 * ent.defaultInterval)); }
+			 */
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} catch (ParseException e) {
@@ -423,7 +440,6 @@ public class ThreadingTicket extends Thread {
 			e.printStackTrace();
 		}
 		return continueExt;
-		// return true;
 	}
 
 	public JSONObject getPaging(String url, long flagId, String flagAccountId) {
