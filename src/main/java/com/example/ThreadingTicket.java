@@ -58,10 +58,10 @@ public class ThreadingTicket extends Thread {
 				gettingEntry(FlagStatus.INIT, "0", new Date().getTime(), flagging.getId(), flagging.getCifAccountId(),
 						interval, false, flagging.getCifDayLimit());
 				flagRepo.save(new Flag(flagging.getId(), accountId, FlagStatus.READY, 0, flagging.getCifDayLimit()));
-			} catch (IOException e1) {
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				// e1.printStackTrace();
-				System.out.println("IOEXCEPTION 65");
+				System.out.println("IOEXCEPTION 64");
 				flagRepo.save(new Flag(flagging.getId(), accountId, FlagStatus.READY, 0, flagging.getCifDayLimit()));
 			}
 		} else {
