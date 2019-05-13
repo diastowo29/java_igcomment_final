@@ -32,6 +32,9 @@ public class Flag implements Serializable {
 
 	@Column(name = "cif_interval")
 	private int cifInterval;
+	
+	@Column(name = "cif_daylimit")
+	private int cifDayLimit;
 
 	public long getId() {
 		return id;
@@ -49,17 +52,22 @@ public class Flag implements Serializable {
 		return cifInterval;
 	}
 	
+	public int getCifDayLimit() {
+		return cifDayLimit;
+	}
+	
 
 	protected Flag() {
 
 	}
 
-	public Flag(long id, String cifAccountId, FlagStatus cifStatus, int cifInterval) {
+	public Flag(long id, String cifAccountId, FlagStatus cifStatus, int cifInterval, int cifDayLimit) {
 		if (id != 0) {
 			this.id = id;
 		}
 		this.cifAccountId = cifAccountId;
 		this.cifStatus = cifStatus.toString();
 		this.cifInterval = cifInterval;
+		this.cifDayLimit = cifDayLimit;
 	}
 }
