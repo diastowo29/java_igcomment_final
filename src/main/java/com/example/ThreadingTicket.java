@@ -42,7 +42,6 @@ public class ThreadingTicket extends Thread {
 		this.lastRepo = lastRepo;
 		this.dataRepo = dataRepo;
 		this.intervalRepo = intervalRepo;
-
 	}
 
 	@Override
