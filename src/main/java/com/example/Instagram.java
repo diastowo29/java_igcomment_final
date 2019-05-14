@@ -89,6 +89,7 @@ public class Instagram {
 		RETURNURL = paramMap.get("return_url");
 
 		model.addAttribute("appId", entity.APP_ID);
+		model.addAttribute("appSecret", entity.APP_SECRET);
 		model.addAttribute("callbackUrl", entity.CALLBACKURL);
 		return "preadmin";
 	}
