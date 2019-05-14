@@ -317,13 +317,6 @@ public class ThreadingTicket extends Thread {
 								}
 							}
 						}
-						/*
-						 * HashMap<String, Object> response = new HashMap<>();
-						 * response.put("external_resources", extResource); System.out.println(new
-						 * JSONObject(response)); DataEntry dataEntry = dataRepo
-						 * .findByCifPostId(allMedia.getJSONArray("data").getJSONObject(i).getString(
-						 * "id"));
-						 */
 						try {
 
 							doSaveDb(0, accountId, allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
@@ -349,15 +342,7 @@ public class ThreadingTicket extends Thread {
 				}
 			}
 
-			/*
-			 * if (tooMuchComment) { intervalRepo.save(new Interval(interval.getId(),
-			 * interval.getCifAccountId(), ent.defaultInterval + 3)); } else {
-			 * intervalRepo.save(new Interval(interval.getId(), interval.getCifAccountId(),
-			 * ent.defaultInterval)); }
-			 */
-		} catch (JSONException e) {
-			e.printStackTrace();
-		} catch (ParseException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
