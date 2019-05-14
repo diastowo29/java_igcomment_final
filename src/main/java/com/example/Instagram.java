@@ -72,13 +72,24 @@ public class Instagram {
 		return "admin";
 	}
 
-	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+	/*@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE,
 			MediaType.APPLICATION_JSON_UTF8_VALUE }, produces = { MediaType.APPLICATION_ATOM_XML_VALUE,
 					MediaType.APPLICATION_JSON_UTF8_VALUE })
 	String indexPost(@RequestParam Map<String, String> paramMap) {
 		System.out.println("/post");
 		RETURNURL = paramMap.get("return_url");
 		System.out.println(RETURNURL);
+		return "preadmin";
+	}*/
+	
+	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+			MediaType.APPLICATION_JSON_UTF8_VALUE }, produces = { MediaType.APPLICATION_ATOM_XML_VALUE,
+					MediaType.APPLICATION_JSON_UTF8_VALUE })
+	String indexPost(@RequestParam Map<String, String> paramMap, Model model) {
+		RETURNURL = paramMap.get("return_url");
+
+		model.addAttribute("appId", entity.APP_ID);
+		model.addAttribute("callbackUrl", entity.CALLBACKURL);
 		return "preadmin";
 	}
 

@@ -8,6 +8,9 @@ public class Entity {
 	public String GET_ACC_ID_API = FB_API_DOMAIN + "/me/accounts?fields=connected_instagram_account,name&access_token=";
 	
 	public int defaultInterval = 2;
+	
+	public String APP_ID = "";
+	public String APP_SECRET = "";
 
 	public String getMediaUrl(String accId, String token) {
 		return FB_API_DOMAIN + "/" + accId
