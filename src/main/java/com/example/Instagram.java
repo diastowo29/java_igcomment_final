@@ -152,7 +152,11 @@ public class Instagram {
 		hashMap.put("igId", igId);
 		System.out.println("igName: " + igName);
 		try {
-			hashMap.put("name", "Instagram - " + URLDecoder.decode(igName, "UTF-8"));
+			if (option.equals("1")) {
+				hashMap.put("name", "Instagram - " + URLDecoder.decode(igName, "UTF-8") + " - Post to Ticket");
+			} else {
+				hashMap.put("name", "Instagram - " + URLDecoder.decode(igName, "UTF-8") + " - Comment to Ticket");
+			}
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
