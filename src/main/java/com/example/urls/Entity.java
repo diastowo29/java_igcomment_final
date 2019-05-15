@@ -9,8 +9,8 @@ public class Entity {
 	
 	public int defaultInterval = 2;
 	
-	public String APP_ID = "";
-	public String APP_SECRET = "";
+	/*public String APP_ID = "";
+	public String APP_SECRET = "";*/
 
 	public String getMediaUrl(String accId, String token) {
 		return FB_API_DOMAIN + "/" + accId

@@ -88,8 +88,8 @@ public class Instagram {
 	String indexPost(@RequestParam Map<String, String> paramMap, Model model) {
 		RETURNURL = paramMap.get("return_url");
 
-		model.addAttribute("appId", entity.APP_ID);
-		model.addAttribute("appSecret", entity.APP_SECRET);
+		/*model.addAttribute("appId", entity.APP_ID);
+		model.addAttribute("appSecret", entity.APP_SECRET);*/
 		model.addAttribute("callbackUrl", entity.CALLBACKURL);
 		return "preadmin";
 	}
