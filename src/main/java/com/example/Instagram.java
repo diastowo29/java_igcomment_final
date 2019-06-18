@@ -181,8 +181,9 @@ public class Instagram {
 	}
 
 	@RequestMapping("/webhook")
-	String webhook(@RequestParam("code") String code, @RequestParam("state") String state, Model model)
+	String webhook(@RequestParam("hub.verify_token") String code, @RequestParam("state") String state, Model model)
 			throws JSONException {
+		System.out.println(code);
 		return "callback";
 	}
 
