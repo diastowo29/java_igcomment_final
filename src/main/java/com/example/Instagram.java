@@ -180,13 +180,6 @@ public class Instagram {
 		return "callback";
 	}
 
-	@RequestMapping("/webhook")
-	String webhook(@RequestParam("hub.verify_token") String code, @RequestParam("state") String state, Model model)
-			throws JSONException {
-		System.out.println(code);
-		return "callback";
-	}
-
 	@RequestMapping(value = "/pull", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> pullV2(@RequestParam Map<String, String> paramMap) throws JSONException {
 
