@@ -41,7 +41,7 @@ public class Webhook {
 		String comment = "";
 		String comment_id = "";
 		String media_id = "";
-		try {
+		/*try {
 			commentJson = new JSONObject(request);
 			if (commentJson.has("entry")) {
 				for (int i = 0; i < commentJson.getJSONArray("entry").length(); i++) {
@@ -62,7 +62,7 @@ public class Webhook {
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
-		}
+		}*/
 		System.out.println("WEbHOOK Triggered");
 		System.out.println(request);
 		System.out.println();
