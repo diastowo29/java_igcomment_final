@@ -36,7 +36,6 @@ public class Webhook {
 					MediaType.APPLICATION_JSON_UTF8_VALUE })
 	public ResponseEntity<String> postWebhook(@RequestBody String request) {
 		System.out.println("/webhook");
-		System.out.println(request);
 		JSONObject commentJson = new JSONObject();
 		String ig_id = "";
 		String comment = "";
