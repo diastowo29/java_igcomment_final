@@ -85,7 +85,7 @@
 		newAppId = document.getElementById('appId').value;
 		newAppSecret = document.getElementById('appSecret').value;
 		
-		window.open("https://www.facebook.com/v3.2/dialog/oauth?client_id=" + newAppId
+		window.open("https://www.facebook.com/v3.3/dialog/oauth?client_id=" + newAppId
 				+ "&redirect_uri=" + callbackUrl + "&state={\"appId\":\""
 				+ newAppId + "\", \"appSecret\":\"" + newAppSecret + "\"}"
 				+ "&scope=manage_pages,publish_pages,instagram_basic,instagram_manage_comments,pages_show_list", 
