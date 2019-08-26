@@ -16,6 +16,7 @@ import com.example.model.Interval;
 import com.example.model.LastEntry;
 import com.example.others.FlagStatus;
 import com.example.repo.DataEntryRepository;
+import com.example.repo.ErrorLogsRepository;
 import com.example.repo.FlagRepository;
 import com.example.repo.IntervalRepository;
 import com.example.repo.LastEntryRepository;
@@ -30,11 +31,12 @@ public class ThreadingTicket extends Thread {
 	LastEntryRepository lastRepo;
 	DataEntryRepository dataRepo;
 	IntervalRepository intervalRepo;
+	ErrorLogsRepository errorRepo;
 
 	boolean tooMuchComment = false;
 
 	public ThreadingTicket(String accountId, String token, String option, FlagRepository flagRepo,
-			LastEntryRepository lastRepo, DataEntryRepository dataRepo, IntervalRepository intervalRepo) {
+			LastEntryRepository lastRepo, DataEntryRepository dataRepo, IntervalRepository intervalRepo, ErrorLogsRepository errorRepo) {
 		this.accountId = accountId;
 		this.token = token;
 		this.option = option;
@@ -42,6 +44,7 @@ public class ThreadingTicket extends Thread {
 		this.lastRepo = lastRepo;
 		this.dataRepo = dataRepo;
 		this.intervalRepo = intervalRepo;
+		this.errorRepo = errorRepo;
 	}
 
 	@Override
@@ -137,7 +140,7 @@ public class ThreadingTicket extends Thread {
 			}
 
 			try {
-				allMedia = calling.hit(apiUrl, "GET");
+				allMedia = calling.hit(apiUrl, "GET", errorRepo);
 			} catch (RuntimeException e) {
 				e.printStackTrace();
 				flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.READY, 0, flagDayLimit));
@@ -391,7 +394,7 @@ public class ThreadingTicket extends Thread {
 	public JSONObject getPaging(String url, long flagId, String flagAccountId) {
 		JSONObject mediaPaging = new JSONObject();
 		HitApi api = new HitApi();
-		mediaPaging = api.hit(url, "GET");
+		mediaPaging = api.hit(url, "GET", errorRepo);
 		return mediaPaging;
 	}
 

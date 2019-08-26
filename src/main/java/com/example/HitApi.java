@@ -12,8 +12,11 @@ import java.nio.charset.Charset;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.example.model.ErrorLogs;
+import com.example.repo.ErrorLogsRepository;
+
 public class HitApi {
-	public JSONObject hit(String newUrl, String method) {
+	public JSONObject hit(String newUrl, String method, ErrorLogsRepository errorRepo) {
 		JSONObject response = new JSONObject();
 		try {
 			System.out.println("CALLING " + method + ": " + newUrl);
@@ -27,6 +30,7 @@ public class HitApi {
 				response = null;
 				// throw new RuntimeException("Failed : HTTP error code : " +
 				// conn.getResponseCode());
+				errorRepo.save(new ErrorLogs(0, "", conn.getResponseMessage(), method));
 			}
 			System.out.println("Output from Server .... \n");
 			BufferedReader rd = new BufferedReader(
