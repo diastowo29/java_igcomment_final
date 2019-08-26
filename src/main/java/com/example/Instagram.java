@@ -61,8 +61,8 @@ public class Instagram {
 		return "preadmin";
 	}
 
-	/* HANDLE POST REQUEST FROM VIEW, see preadmin.html */
-	@PostMapping(value = "/admin", consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+	/* HANDLE POST REQUEST FROM VIEW, see preadmin.html --- NOT USED ANYMORE*/
+	/*@PostMapping(value = "/admin", consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE,
 			MediaType.APPLICATION_JSON_UTF8_VALUE }, produces = { MediaType.APPLICATION_ATOM_XML_VALUE,
 					MediaType.APPLICATION_JSON_UTF8_VALUE })
 	public String newIndex(@RequestParam("appId") String appId, @RequestParam("appSecret") String appSecret,
@@ -72,7 +72,7 @@ public class Instagram {
 		model.addAttribute("appId", appId);
 		model.addAttribute("appSecret", appSecret);
 		return "admin";
-	}
+	}*/
 
 	/*
 	 * @RequestMapping(method = RequestMethod.POST, consumes = {
