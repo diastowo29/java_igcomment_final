@@ -67,6 +67,8 @@ public class Instagram {
 					MediaType.APPLICATION_JSON_UTF8_VALUE })
 	public String newIndex(@RequestParam("appId") String appId, @RequestParam("appSecret") String appSecret,
 			Model model) {
+		
+		System.out.println(" ===== ADMIN CALLED ======");
 		model.addAttribute("appId", appId);
 		model.addAttribute("appSecret", appSecret);
 		return "admin";
