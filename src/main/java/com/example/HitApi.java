@@ -30,7 +30,7 @@ public class HitApi {
 				response = null;
 				// throw new RuntimeException("Failed : HTTP error code : " +
 				// conn.getResponseCode());
-				errorRepo.save(new ErrorLogs(0, "", conn.getResponseMessage(), method));
+				errorRepo.save(new ErrorLogs(0, "", conn.getResponseMessage() + " - " + conn.getResponseCode(), method));
 			}
 			System.out.println("Output from Server .... \n");
 			BufferedReader rd = new BufferedReader(
