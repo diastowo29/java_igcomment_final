@@ -157,6 +157,8 @@ public class ThreadingTicket extends Thread {
 					flagging.setCifStatus(FlagStatus.REAUTH);
 					Flag newFlag = flagRepo.save(flagging);
 					System.out.println(newFlag.getCifStatus());
+					System.out.println(newFlag.getCifAccountId());
+					System.out.println(newFlag.getId());
 				}
 			} else {
 				if (allMedia.has("data")) {
