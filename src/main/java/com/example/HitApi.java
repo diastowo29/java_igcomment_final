@@ -32,7 +32,7 @@ public class HitApi {
 				// conn.getResponseCode());
 				errorRepo.save(new ErrorLogs(0, "", conn.getResponseMessage() + " - " + conn.getResponseCode(), method));
 				
-				response = new JSONObject().put("failed_status", "error").put("code", conn.getResponseCode()).put("message", conn.getResponseMessage());
+				response = new JSONObject().put("failed_status", "error").put("code", String.valueOf(conn.getResponseCode())).put("message", conn.getResponseMessage());
 			}
 			System.out.println("Output from Server .... \n");
 			BufferedReader rd = new BufferedReader(
