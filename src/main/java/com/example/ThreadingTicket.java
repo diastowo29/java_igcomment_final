@@ -15,6 +15,7 @@ import com.example.model.Flag;
 import com.example.model.Interval;
 import com.example.model.LastEntry;
 import com.example.others.FlagStatus;
+import com.example.others.ResponseCode;
 import com.example.repo.DataEntryRepository;
 import com.example.repo.ErrorLogsRepository;
 import com.example.repo.FlagRepository;
@@ -145,219 +146,224 @@ public class ThreadingTicket extends Thread {
 				e.printStackTrace();
 				flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.READY, 0, flagDayLimit));
 			}
+			
+			if (allMedia.has("failed_status")) {
+				if (allMedia.get("code").toString().equals(ResponseCode.BAD_REQUEST)) {
+					flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.REAUTH, 0, flagDayLimit));
+				}
+			} else {
+				if (allMedia.has("data")) {
+					for (int i = 0; i < allMedia.getJSONArray("data").length(); i++) {
+						extResource = new ArrayList<>();
+						Date postDate = sdf.parse(allMedia.getJSONArray("data").getJSONObject(i).getString("timestamp"));
 
-			if (allMedia.has("data")) {
-				for (int i = 0; i < allMedia.getJSONArray("data").length(); i++) {
-					extResource = new ArrayList<>();
-					Date postDate = sdf.parse(allMedia.getJSONArray("data").getJSONObject(i).getString("timestamp"));
+						/*
+						 * ZonedDateTime zdt =
+						 * ZonedDateTime.parse(allMedia.getJSONArray("data").getJSONObject(i)
+						 * .getString("timestamp").replace("+0000", "Z")); LocalDateTime ldt =
+						 * zdt.toLocalDateTime();
+						 * 
+						 * System.out.println(allMedia.getJSONArray("data").getJSONObject(i).getString(
+						 * "timestamp")); System.out.println(ldt);
+						 */
 
-					/*
-					 * ZonedDateTime zdt =
-					 * ZonedDateTime.parse(allMedia.getJSONArray("data").getJSONObject(i)
-					 * .getString("timestamp").replace("+0000", "Z")); LocalDateTime ldt =
-					 * zdt.toLocalDateTime();
-					 * 
-					 * System.out.println(allMedia.getJSONArray("data").getJSONObject(i).getString(
-					 * "timestamp")); System.out.println(ldt);
-					 */
+						long diff = (lastRun) - (postDate.getTime());
+						/*
+						 * long diffHours = diff / (60 * 60 * 1000);
+						 * 
+						 * long diffSeconds = diff / 1000 % 60; long diffMinutes = diff / (60 * 1000) %
+						 * 60; long diffHours = diff / (60 * 60 * 1000) % 24;
+						 */
+						long diffDays = diff / (24 * 60 * 60 * 1000);
 
-					long diff = (lastRun) - (postDate.getTime());
-					/*
-					 * long diffHours = diff / (60 * 60 * 1000);
-					 * 
-					 * long diffSeconds = diff / 1000 % 60; long diffMinutes = diff / (60 * 1000) %
-					 * 60; long diffHours = diff / (60 * 60 * 1000) % 24;
-					 */
-					long diffDays = diff / (24 * 60 * 60 * 1000);
+						if (diffDays <= flagDayLimit) {
+							System.out.println("===== NEW ARRAY IS COMMING =====");
+							String parentMedia = allMedia.getJSONArray("data").getJSONObject(i).getString("id") + "-"
+									+ accountId;
+							HashMap<String, String> author = new HashMap<>();
 
-					if (diffDays <= flagDayLimit) {
-						System.out.println("===== NEW ARRAY IS COMMING =====");
-						String parentMedia = allMedia.getJSONArray("data").getJSONObject(i).getString("id") + "-"
-								+ accountId;
-						HashMap<String, String> author = new HashMap<>();
-
-						if (allMedia.getJSONArray("data").getJSONObject(i).getInt("comments_count") > 500) {
-							tooMuchComment = true;
-						}
-
-						author.put("external_id", "cif-user-" + allMedia.getJSONArray("data").getJSONObject(i)
-								.getJSONObject("owner").getString("username") + "-" + accountId);
-						author.put("name", allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("owner")
-								.getString("username"));
-						extObj = new HashMap<>();
-						extObj.put("external_id", "cif-media-" + parentMedia);
-						extObj.put("message", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
-						extObj.put("created_at", allMedia.getJSONArray("data").getJSONObject(i).getString("timestamp")
-								.replace("+0000", "Z"));
-
-						HashMap<String, String> displayObject = new HashMap<>();
-						HashMap<String, Object> displayInfo = new HashMap<>();
-						ArrayList<Object> displayArray = new ArrayList<>();
-						ArrayList<Object> fieldsArray = new ArrayList<>();
-						ArrayList<String> tagsArray = new ArrayList<>();
-
-						displayObject.put("media_url",
-								allMedia.getJSONArray("data").getJSONObject(i).getString("media_url"));
-						displayInfo.put("type", "cif-media-" + parentMedia);
-						displayInfo.put("data", displayObject);
-						displayArray.add(displayInfo);
-						displayObject = new HashMap<>();
-						displayInfo = new HashMap<>();
-						displayObject.put("media_caption",
-								allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
-						displayInfo.put("type", "cif-caption-" + parentMedia);
-						displayInfo.put("data", displayObject);
-						displayArray.add(displayInfo);
-
-						extObj.put("display_info", displayArray);
-						extObj.put("author", author);
-						extObj.put("allow_channelback", true);
-
-						tagsArray.add("ig_" + allMedia.getJSONArray("data").getJSONObject(i).getString("id"));
-						HashMap<String, Object> fieldsObj = new HashMap<>();
-						fieldsObj.put("id", "tags");
-						fieldsObj.put("value", tagsArray);
-						fieldsArray.add(fieldsObj);
-						fieldsObj = new HashMap<>();
-						fieldsObj.put("id", "external_id");
-						fieldsObj.put("value", "cif-user-" + allMedia.getJSONArray("data").getJSONObject(i)
-								.getJSONObject("owner").getString("username") + "-" + accountId);
-						fieldsArray.add(fieldsObj);
-						extObj.put("fields", fieldsArray);
-
-						extResource.add(extObj);
-						if (allMedia.getJSONArray("data").getJSONObject(i).has("comments")) {
-							// boolean gotAllComment = false;
-							for (int j = 0; j < allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("comments")
-									.getJSONArray("data").length(); j++) {
-								boolean continueExt = false;
-								JSONObject mediaJson = allMedia.getJSONArray("data").getJSONObject(i)
-										.getJSONObject("comments");
-
-								continueExt = checkForContinue(flagStatus,
-										allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("comments")
-												.getJSONArray("data").getJSONObject(j).getString("timestamp"),
-										lastRun);
-
-								extResource = extractData(allMedia, i, mediaJson, j, displayObject, displayInfo,
-										displayArray, fieldsArray, tagsArray, author, option, accountId, extObj,
-										parentMedia, extResource, continueExt);
-
-								if (extResource.size() >= commentLimit) {
-									doSaveDb(0, accountId,
-											allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
-											extResource);
-									extResource = new ArrayList<>();
-								}
+							if (allMedia.getJSONArray("data").getJSONObject(i).getInt("comments_count") > 500) {
+								tooMuchComment = true;
 							}
-							String pageUrl = "";
-							if (allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("comments")
-									.has("paging")) {
+
+							author.put("external_id", "cif-user-" + allMedia.getJSONArray("data").getJSONObject(i)
+									.getJSONObject("owner").getString("username") + "-" + accountId);
+							author.put("name", allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("owner")
+									.getString("username"));
+							extObj = new HashMap<>();
+							extObj.put("external_id", "cif-media-" + parentMedia);
+							extObj.put("message", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
+							extObj.put("created_at", allMedia.getJSONArray("data").getJSONObject(i).getString("timestamp")
+									.replace("+0000", "Z"));
+
+							HashMap<String, String> displayObject = new HashMap<>();
+							HashMap<String, Object> displayInfo = new HashMap<>();
+							ArrayList<Object> displayArray = new ArrayList<>();
+							ArrayList<Object> fieldsArray = new ArrayList<>();
+							ArrayList<String> tagsArray = new ArrayList<>();
+
+							displayObject.put("media_url",
+									allMedia.getJSONArray("data").getJSONObject(i).getString("media_url"));
+							displayInfo.put("type", "cif-media-" + parentMedia);
+							displayInfo.put("data", displayObject);
+							displayArray.add(displayInfo);
+							displayObject = new HashMap<>();
+							displayInfo = new HashMap<>();
+							displayObject.put("media_caption",
+									allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
+							displayInfo.put("type", "cif-caption-" + parentMedia);
+							displayInfo.put("data", displayObject);
+							displayArray.add(displayInfo);
+
+							extObj.put("display_info", displayArray);
+							extObj.put("author", author);
+							extObj.put("allow_channelback", true);
+
+							tagsArray.add("ig_" + allMedia.getJSONArray("data").getJSONObject(i).getString("id"));
+							HashMap<String, Object> fieldsObj = new HashMap<>();
+							fieldsObj.put("id", "tags");
+							fieldsObj.put("value", tagsArray);
+							fieldsArray.add(fieldsObj);
+							fieldsObj = new HashMap<>();
+							fieldsObj.put("id", "external_id");
+							fieldsObj.put("value", "cif-user-" + allMedia.getJSONArray("data").getJSONObject(i)
+									.getJSONObject("owner").getString("username") + "-" + accountId);
+							fieldsArray.add(fieldsObj);
+							extObj.put("fields", fieldsArray);
+
+							extResource.add(extObj);
+							if (allMedia.getJSONArray("data").getJSONObject(i).has("comments")) {
+								// boolean gotAllComment = false;
+								for (int j = 0; j < allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("comments")
+										.getJSONArray("data").length(); j++) {
+									boolean continueExt = false;
+									JSONObject mediaJson = allMedia.getJSONArray("data").getJSONObject(i)
+											.getJSONObject("comments");
+
+									continueExt = checkForContinue(flagStatus,
+											allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("comments")
+													.getJSONArray("data").getJSONObject(j).getString("timestamp"),
+											lastRun);
+
+									extResource = extractData(allMedia, i, mediaJson, j, displayObject, displayInfo,
+											displayArray, fieldsArray, tagsArray, author, option, accountId, extObj,
+											parentMedia, extResource, continueExt);
+
+									if (extResource.size() >= commentLimit) {
+										doSaveDb(0, accountId,
+												allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
+												extResource);
+										extResource = new ArrayList<>();
+									}
+								}
+								String pageUrl = "";
 								if (allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("comments")
-										.getJSONObject("paging").has("next")) {
-									try {
-										pageUrl = allMedia.getJSONArray("data").getJSONObject(i)
-												.getJSONObject("comments").getJSONObject("paging").getString("next");
+										.has("paging")) {
+									if (allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("comments")
+											.getJSONObject("paging").has("next")) {
+										try {
+											pageUrl = allMedia.getJSONArray("data").getJSONObject(i)
+													.getJSONObject("comments").getJSONObject("paging").getString("next");
 
-										JSONObject mediaPaging = getPaging(pageUrl, flagId, flagAccountId);
-										for (int p = 0; p < mediaPaging.getJSONArray("data").length(); p++) {
-											boolean continueExt = false;
+											JSONObject mediaPaging = getPaging(pageUrl, flagId, flagAccountId);
+											if (mediaPaging.has("failed_status")) {
+												if (mediaPaging.get("code").toString().equals(ResponseCode.BAD_REQUEST)) {
+													flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.REAUTH, 0, flagDayLimit));
+												}
+											} else {
+												for (int p = 0; p < mediaPaging.getJSONArray("data").length(); p++) {
+													boolean continueExt = false;
 
-											continueExt = checkForContinue(flagStatus, mediaPaging.getJSONArray("data")
-													.getJSONObject(p).getString("timestamp"), lastRun);
+													continueExt = checkForContinue(flagStatus, mediaPaging.getJSONArray("data")
+															.getJSONObject(p).getString("timestamp"), lastRun);
 
-											extResource = extractData(allMedia, i, mediaPaging, p, displayObject,
-													displayInfo, displayArray, fieldsArray, tagsArray, author, option,
-													accountId, extObj, parentMedia, extResource, continueExt);
+													extResource = extractData(allMedia, i, mediaPaging, p, displayObject,
+															displayInfo, displayArray, fieldsArray, tagsArray, author, option,
+															accountId, extObj, parentMedia, extResource, continueExt);
 
-											if (extResource.size() >= commentLimit) {
-												doSaveDb(0, accountId,
-														allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
-														extResource);
-												extResource = new ArrayList<>();
-											}
-										}
-										while (mediaPaging.has("paging")) {
-											if (mediaPaging.getJSONObject("paging").has("next")) {
-												try {
-													mediaPaging = getPaging(
-															mediaPaging.getJSONObject("paging").getString("next"),
-															flagId, flagAccountId);
-													for (int p = 0; p < mediaPaging.getJSONArray("data")
-															.length(); p++) {
-														boolean continueExt = false;
+													if (extResource.size() >= commentLimit) {
+														doSaveDb(0, accountId,
+																allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
+																extResource);
+														extResource = new ArrayList<>();
+													}
+												}
+												while (mediaPaging.has("paging")) {
+													if (mediaPaging.getJSONObject("paging").has("next")) {
+														try {
+															mediaPaging = getPaging(
+																	mediaPaging.getJSONObject("paging").getString("next"),
+																	flagId, flagAccountId);
+															if (mediaPaging.has("failed_status")) {
+																if (mediaPaging.get("code").toString().equals(ResponseCode.BAD_REQUEST)) {
+																	flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.REAUTH, 0, flagDayLimit));
+																}
+															} else {
+																for (int p = 0; p < mediaPaging.getJSONArray("data")
+																		.length(); p++) {
+																	boolean continueExt = false;
 
-														continueExt = checkForContinue(
-																flagStatus, mediaPaging.getJSONArray("data")
-																		.getJSONObject(p).getString("timestamp"),
-																lastRun);
+																	continueExt = checkForContinue(
+																			flagStatus, mediaPaging.getJSONArray("data")
+																					.getJSONObject(p).getString("timestamp"),
+																			lastRun);
 
-														extResource = extractData(allMedia, i, mediaPaging, p,
-																displayObject, displayInfo, displayArray, fieldsArray,
-																tagsArray, author, option, accountId, extObj,
-																parentMedia, extResource, continueExt);
+																	extResource = extractData(allMedia, i, mediaPaging, p,
+																			displayObject, displayInfo, displayArray, fieldsArray,
+																			tagsArray, author, option, accountId, extObj,
+																			parentMedia, extResource, continueExt);
 
-														if (extResource.size() >= commentLimit) {
-															doSaveDb(
-																	0, accountId, allMedia.getJSONArray("data")
-																			.getJSONObject(i).getString("id"),
-																	extResource);
-															extResource = new ArrayList<>();
+																	if (extResource.size() >= commentLimit) {
+																		doSaveDb(
+																				0, accountId, allMedia.getJSONArray("data")
+																						.getJSONObject(i).getString("id"),
+																				extResource);
+																		extResource = new ArrayList<>();
+																	}
+																}
+															}
+														} catch (RuntimeException e) {
+															e.printStackTrace();
+															flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.READY, 0,
+																	flagDayLimit));
 														}
 													}
-												} catch (RuntimeException e) {
-													e.printStackTrace();
-													flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.READY, 0,
-															flagDayLimit));
 												}
 											}
+										} catch (RuntimeException e) {
+											e.printStackTrace();
+											flagRepo.save(
+													new Flag(flagId, flagAccountId, FlagStatus.READY, 0, flagDayLimit));
 										}
-									} catch (RuntimeException e) {
-										e.printStackTrace();
-										flagRepo.save(
-												new Flag(flagId, flagAccountId, FlagStatus.READY, 0, flagDayLimit));
 									}
 								}
 							}
-						}
-						/*
-						 * HashMap<String, Object> response = new HashMap<>();
-						 * response.put("external_resources", extResource); System.out.println(new
-						 * JSONObject(response)); DataEntry dataEntry = dataRepo
-						 * .findByCifPostId(allMedia.getJSONArray("data").getJSONObject(i).getString(
-						 * "id"));
-						 */
-						try {
-
-							doSaveDb(0, accountId, allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
-									extResource);
-							extResource = new ArrayList<>();
 							
-						} catch (NullPointerException e) {
-							doSaveDb(0, accountId, allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
-									extResource);
-							extResource = new ArrayList<>();
+							try {
+								doSaveDb(0, accountId, allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
+										extResource);
+								extResource = new ArrayList<>();
+								
+							} catch (NullPointerException e) {
+								doSaveDb(0, accountId, allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
+										extResource);
+								extResource = new ArrayList<>();
+							}
+						} else {
+							thatsAll = true;
 						}
-					} else {
-						thatsAll = true;
 					}
 				}
-			}
-			if (!thatsAll) {
-				if (allMedia.has("paging")) {
-					if (allMedia.getJSONObject("paging").has("next")) {
-						gettingEntry(flagStatus, allMedia.getJSONObject("paging").getString("next"), lastRun, flagId,
-								flagAccountId, interval, tooMuchComment, flagDayLimit);
+				if (!thatsAll) {
+					if (allMedia.has("paging")) {
+						if (allMedia.getJSONObject("paging").has("next")) {
+							gettingEntry(flagStatus, allMedia.getJSONObject("paging").getString("next"), lastRun, flagId,
+									flagAccountId, interval, tooMuchComment, flagDayLimit);
+						}
 					}
 				}
 			}
 
-			/*
-			 * if (tooMuchComment) { intervalRepo.save(new Interval(interval.getId(),
-			 * interval.getCifAccountId(), ent.defaultInterval + 3)); } else {
-			 * intervalRepo.save(new Interval(interval.getId(), interval.getCifAccountId(),
-			 * ent.defaultInterval)); }
-			 */
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} catch (ParseException e) {

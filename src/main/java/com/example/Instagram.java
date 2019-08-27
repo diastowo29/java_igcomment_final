@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.model.DataEntry;
+import com.example.model.Flag;
+import com.example.others.FlagStatus;
 import com.example.repo.ClientRepository;
 import com.example.repo.DataEntryRepository;
 import com.example.repo.ErrorLogsRepository;
@@ -203,51 +205,62 @@ public class Instagram {
 		// String option = "1";
 
 		List<DataEntry> dataEntry = dataRepo.findByCifAccountId(accountId);
+
+		Flag flagging = flagRepo.findByCifAccountId(accountId);
+		
 		List<DataEntry> willbeDelete = new ArrayList<>();
 		boolean alreadyFull = false;
 		int extCounter = 0;
 
 		System.out.println(dataRepo.count());
+		
+		HttpStatus responseCode;
+		
+		if (flagging.getCifStatus().equals(FlagStatus.REAUTH)) {
+			responseCode = HttpStatus.UNAUTHORIZED;
+		} else {
+			for (int i = 0; i < dataEntry.size(); i++) {
 
-		for (int i = 0; i < dataEntry.size(); i++) {
-
-			@SuppressWarnings("unchecked")
-			ArrayList<Object> cifJsonData = gson.fromJson(dataEntry.get(i).getCifJsonData(), ArrayList.class);
-			if (!alreadyFull) {
-				for (int j = 0; j < cifJsonData.size(); j++) {
-					if (extCounter >= 199) {
-						alreadyFull = true;
-						extResourceRest.add(cifJsonData.get(j));
+				@SuppressWarnings("unchecked")
+				ArrayList<Object> cifJsonData = gson.fromJson(dataEntry.get(i).getCifJsonData(), ArrayList.class);
+				if (!alreadyFull) {
+					for (int j = 0; j < cifJsonData.size(); j++) {
+						if (extCounter >= 199) {
+							alreadyFull = true;
+							extResourceRest.add(cifJsonData.get(j));
+						} else {
+							extResource.add(cifJsonData.get(j));
+							extCounter++;
+						}
+					}
+					if (extResourceRest.size() > 0) {
+						System.out.println("===== UPDATE DB WITH ID: " + dataEntry.get(i).getId() + " =====");
+						doSaveDataEntryDb(dataEntry.get(i).getId(), dataEntry.get(i).getCifAccountId(),
+								dataEntry.get(i).getCifPostId(), extResourceRest);
+						extResourceRest = new ArrayList<>();
 					} else {
-						extResource.add(cifJsonData.get(j));
-						extCounter++;
+						willbeDelete.add(dataEntry.get(i));
 					}
 				}
-				if (extResourceRest.size() > 0) {
-					System.out.println("===== UPDATE DB WITH ID: " + dataEntry.get(i).getId() + " =====");
-					doSaveDataEntryDb(dataEntry.get(i).getId(), dataEntry.get(i).getCifAccountId(),
-							dataEntry.get(i).getCifPostId(), extResourceRest);
-					extResourceRest = new ArrayList<>();
-				} else {
-					willbeDelete.add(dataEntry.get(i));
-				}
 			}
-		}
-		response.put("external_resources", extResource);
+			response.put("external_resources", extResource);
 
-		for (int i = 0; i < willbeDelete.size(); i++) {
-			dataRepo.delete(willbeDelete.get(i));
-		}
+			for (int i = 0; i < willbeDelete.size(); i++) {
+				dataRepo.delete(willbeDelete.get(i));
+			}
 
-		if (dataRepo.count() <= 2) {
-			ThreadingTicket ticketThread = new ThreadingTicket(accountId, token, option, flagRepo, lastRepo, dataRepo,
-					intervalRepo, errorRepo);
-			ticketThread.start();
-		} else {
-			System.out.println("===== Still too many rows at DB =====");
+			if (dataRepo.count() <= 2) {
+				ThreadingTicket ticketThread = new ThreadingTicket(accountId, token, option, flagRepo, lastRepo, dataRepo,
+						intervalRepo, errorRepo);
+				ticketThread.start();
+			} else {
+				System.out.println("===== Still too many rows at DB =====");
+			}
+			responseCode = HttpStatus.OK;
 		}
+		
 
-		return new ResponseEntity<Object>(response, HttpStatus.OK);
+		return new ResponseEntity<Object>(response, responseCode);
 	}
 
 	private void doSaveDataEntryDb(long id, String accountId, String postId, ArrayList<Object> extResource) {
