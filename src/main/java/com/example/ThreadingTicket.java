@@ -60,8 +60,7 @@ public class ThreadingTicket extends Thread {
 			Interval interval = intervalRepo.save(new Interval(0, accountId, ent.defaultInterval));
 			lastRepo.save(new LastEntry(0, accountId, new Date().getTime()));
 			try {
-				gettingEntry(FlagStatus.INIT, "0", new Date().getTime(), flagging.getId(), flagging.getCifAccountId(),
-						interval, false, flagging.getCifDayLimit());
+				gettingEntry(FlagStatus.INIT, "0", new Date().getTime(), flagging, interval, false);
 				flagRepo.save(new Flag(flagging.getId(), accountId, FlagStatus.READY, 0, flagging.getCifDayLimit()));
 			} catch (Exception e) {
 				flagRepo.save(new Flag(flagging.getId(), accountId, FlagStatus.READY, 0, flagging.getCifDayLimit()));
@@ -82,8 +81,7 @@ public class ThreadingTicket extends Thread {
 						LastEntry lastEntry = lastRepo.findByCifAccountId(accountId);
 						lastRun = lastEntry.getCifLastEntry();
 
-						gettingEntry(FlagStatus.PROCESSED, "0", lastRun, flagging.getId(), flagging.getCifAccountId(),
-								interval, false, flagging.getCifDayLimit());
+						gettingEntry(FlagStatus.PROCESSED, "0", lastRun, flagging, interval, false);
 
 						lastRepo.save(new LastEntry(lastEntry.getId(), accountId, new Date().getTime()));
 						flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0,
@@ -121,8 +119,8 @@ public class ThreadingTicket extends Thread {
 		return flagging;
 	}
 
-	public void gettingEntry(FlagStatus flagStatus, String nextUrl, long lastRun, long flagId, String flagAccountId,
-			Interval interval, boolean tooMuchComment, int flagDayLimit) throws IOException {
+	public void gettingEntry(FlagStatus flagStatus, String nextUrl, long lastRun, Flag flagging, Interval interval,
+			boolean tooMuchComment) throws IOException {
 		HitApi calling = new HitApi();
 		Entity ent = new Entity();
 		JSONObject allMedia = new JSONObject();
@@ -148,12 +146,15 @@ public class ThreadingTicket extends Thread {
 				allMedia = calling.hit(apiUrl, "GET", errorRepo);
 			} catch (RuntimeException e) {
 				e.printStackTrace();
-				flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.READY, 0, flagDayLimit));
+				flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0,
+						flagging.getCifDayLimit()));
 			}
 			if (allMedia.has("failed_status")) {
 				if (allMedia.get("code").toString().equals(ResponseCode.BAD_REQUEST.toString())) {
-					System.out.println("=== " + flagId + " " + flagAccountId + " need re-auth === " + FlagStatus.REAUTH);
-					flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.REAUTH, 2, flagDayLimit));
+					System.out.println("=== " + flagging + " " + flagging.getCifAccountId() + " need re-auth === "
+							+ FlagStatus.REAUTH);
+					flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.REAUTH, 2,
+							flagging.getCifDayLimit()));
 				}
 			} else {
 				if (allMedia.has("data")) {
@@ -181,7 +182,7 @@ public class ThreadingTicket extends Thread {
 						 */
 						long diffDays = diff / (24 * 60 * 60 * 1000);
 
-						if (diffDays <= flagDayLimit) {
+						if (diffDays <= flagging.getCifDayLimit()) {
 							System.out.println("===== NEW ARRAY IS COMMING =====");
 							String parentMedia = allMedia.getJSONArray("data").getJSONObject(i).getString("id") + "-"
 									+ accountId;
@@ -275,12 +276,13 @@ public class ThreadingTicket extends Thread {
 													.getJSONObject("comments").getJSONObject("paging")
 													.getString("next");
 
-											JSONObject mediaPaging = getPaging(pageUrl, flagId, flagAccountId);
+											JSONObject mediaPaging = getPaging(pageUrl, flagging.getId(),
+													flagging.getCifAccountId());
 											if (mediaPaging.has("failed_status")) {
 												if (mediaPaging.get("code").toString()
 														.equals(ResponseCode.BAD_REQUEST.toString())) {
-													flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.REAUTH, 0,
-															flagDayLimit));
+													flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(),
+															FlagStatus.REAUTH, 0, flagging.getCifDayLimit()));
 												}
 											} else {
 												for (int p = 0; p < mediaPaging.getJSONArray("data").length(); p++) {
@@ -305,13 +307,17 @@ public class ThreadingTicket extends Thread {
 												while (mediaPaging.has("paging")) {
 													if (mediaPaging.getJSONObject("paging").has("next")) {
 														try {
-															mediaPaging = getPaging(mediaPaging.getJSONObject("paging")
-																	.getString("next"), flagId, flagAccountId);
+															mediaPaging = getPaging(
+																	mediaPaging.getJSONObject("paging")
+																			.getString("next"),
+																	flagging.getId(), flagging.getCifAccountId());
 															if (mediaPaging.has("failed_status")) {
 																if (mediaPaging.get("code").toString()
 																		.equals(ResponseCode.BAD_REQUEST.toString())) {
-																	flagRepo.save(new Flag(flagId, flagAccountId,
-																			FlagStatus.REAUTH, 0, flagDayLimit));
+																	flagRepo.save(new Flag(flagging.getId(),
+																			flagging.getCifAccountId(),
+																			FlagStatus.REAUTH, 0,
+																			flagging.getCifDayLimit()));
 																}
 															} else {
 																for (int p = 0; p < mediaPaging.getJSONArray("data")
@@ -342,16 +348,17 @@ public class ThreadingTicket extends Thread {
 															}
 														} catch (RuntimeException e) {
 															e.printStackTrace();
-															flagRepo.save(new Flag(flagId, flagAccountId,
-																	FlagStatus.READY, 0, flagDayLimit));
+															flagRepo.save(new Flag(flagging.getId(),
+																	flagging.getCifAccountId(), FlagStatus.READY, 0,
+																	flagging.getCifDayLimit()));
 														}
 													}
 												}
 											}
 										} catch (RuntimeException e) {
 											e.printStackTrace();
-											flagRepo.save(
-													new Flag(flagId, flagAccountId, FlagStatus.READY, 0, flagDayLimit));
+											flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(),
+													FlagStatus.READY, 0, flagging.getCifDayLimit()));
 										}
 									}
 								}
@@ -376,7 +383,7 @@ public class ThreadingTicket extends Thread {
 					if (allMedia.has("paging")) {
 						if (allMedia.getJSONObject("paging").has("next")) {
 							gettingEntry(flagStatus, allMedia.getJSONObject("paging").getString("next"), lastRun,
-									flagId, flagAccountId, interval, tooMuchComment, flagDayLimit);
+									flagging, interval, tooMuchComment);
 						}
 					}
 				}
