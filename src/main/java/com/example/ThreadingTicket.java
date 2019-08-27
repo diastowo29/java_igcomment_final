@@ -151,7 +151,7 @@ public class ThreadingTicket extends Thread {
 			}
 			if (allMedia.has("failed_status")) {
 				if (allMedia.get("code").toString().equals(ResponseCode.BAD_REQUEST.toString())) {
-					System.out.println("=== " + flagging + " " + flagging.getCifAccountId() + " need re-auth === "
+					System.out.println("=== " + flagging.getId() + " " + flagging.getCifAccountId() + " need re-auth === "
 							+ FlagStatus.REAUTH);
 					flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.REAUTH, 2,
 							flagging.getCifDayLimit()));
