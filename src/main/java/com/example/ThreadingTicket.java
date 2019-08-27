@@ -151,11 +151,8 @@ public class ThreadingTicket extends Thread {
 				flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.READY, 0, flagDayLimit));
 			}
 			if (allMedia.has("failed_status")) {
-//				System.out.println(allMedia.get("code").toString().equals(ResponseCode.BAD_REQUEST.toString()));
-//				System.out.println(allMedia.get("code").toString());
-//				System.out.println(ResponseCode.BAD_REQUEST);
 				if (allMedia.get("code").toString().equals(ResponseCode.BAD_REQUEST.toString())) {
-					System.out.println("=== need re-auth ===");
+					System.out.println("=== " + flagId + " need re-auth === " + FlagStatus.REAUTH);
 					flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.REAUTH, 0, flagDayLimit));
 				}
 			} else {
