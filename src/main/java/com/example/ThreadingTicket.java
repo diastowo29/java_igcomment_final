@@ -155,6 +155,7 @@ public class ThreadingTicket extends Thread {
 //				System.out.println(allMedia.get("code").toString());
 //				System.out.println(ResponseCode.BAD_REQUEST);
 				if (allMedia.get("code").toString().equals(ResponseCode.BAD_REQUEST.toString())) {
+					System.out.println("=== need re-auth ===");
 					flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.REAUTH, 0, flagDayLimit));
 				}
 			} else {
@@ -280,7 +281,7 @@ public class ThreadingTicket extends Thread {
 											JSONObject mediaPaging = getPaging(pageUrl, flagId, flagAccountId);
 											if (mediaPaging.has("failed_status")) {
 												if (mediaPaging.get("code").toString()
-														.equals(ResponseCode.BAD_REQUEST)) {
+														.equals(ResponseCode.BAD_REQUEST.toString())) {
 													flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.REAUTH, 0,
 															flagDayLimit));
 												}
@@ -311,7 +312,7 @@ public class ThreadingTicket extends Thread {
 																	.getString("next"), flagId, flagAccountId);
 															if (mediaPaging.has("failed_status")) {
 																if (mediaPaging.get("code").toString()
-																		.equals(ResponseCode.BAD_REQUEST)) {
+																		.equals(ResponseCode.BAD_REQUEST.toString())) {
 																	flagRepo.save(new Flag(flagId, flagAccountId,
 																			FlagStatus.REAUTH, 0, flagDayLimit));
 																}
