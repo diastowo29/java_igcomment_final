@@ -151,11 +151,12 @@ public class ThreadingTicket extends Thread {
 			}
 			if (allMedia.has("failed_status")) {
 				if (allMedia.get("code").toString().equals(ResponseCode.BAD_REQUEST.toString())) {
-					System.out.println("=== " + flagging.getId() + " " + flagging.getCifAccountId() + " need re-auth === "
-							+ FlagStatus.REAUTH);
-					
+					System.out.println("=== " + flagging.getId() + " " + flagging.getCifAccountId()
+							+ " need re-auth === " + FlagStatus.REAUTH);
+
 					flagging.setCifStatus(FlagStatus.REAUTH);
-					flagRepo.save(flagging);
+					Flag newFlag = flagRepo.save(flagging);
+					System.out.println(newFlag.getCifStatus());
 				}
 			} else {
 				if (allMedia.has("data")) {
