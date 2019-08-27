@@ -149,8 +149,10 @@ public class ThreadingTicket extends Thread {
 				e.printStackTrace();
 				flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.READY, 0, flagDayLimit));
 			}
-			
 			if (allMedia.has("failed_status")) {
+				System.out.println(allMedia.get("code").toString().equals(ResponseCode.BAD_REQUEST));
+				System.out.println(allMedia.get("code").toString());
+				System.out.println(ResponseCode.BAD_REQUEST);
 				if (allMedia.get("code").toString().equals(ResponseCode.BAD_REQUEST)) {
 					flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.REAUTH, 0, flagDayLimit));
 				}
