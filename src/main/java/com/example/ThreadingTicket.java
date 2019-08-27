@@ -9,6 +9,7 @@ import java.util.HashMap;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.example.model.DataEntry;
 import com.example.model.Flag;
@@ -150,7 +151,7 @@ public class ThreadingTicket extends Thread {
 				flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.READY, 0, flagDayLimit));
 			}
 			if (allMedia.has("failed_status")) {
-				System.out.println(allMedia.get("code").toString().equals(ResponseCode.BAD_REQUEST));
+				System.out.println(allMedia.get("code").toString().equals(ResponseCode.BAD_REQUEST.toString()));
 				System.out.println(allMedia.get("code").toString());
 				System.out.println(ResponseCode.BAD_REQUEST);
 				if (allMedia.get("code").toString().equals(ResponseCode.BAD_REQUEST)) {
