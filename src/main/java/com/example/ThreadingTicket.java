@@ -86,6 +86,7 @@ public class ThreadingTicket extends Thread {
 						if (needReauth) {
 							System.out.println("===== cif need to be reauth ======");
 							flagging.setCifStatus(FlagStatus.REAUTH);
+							flagging.setCifInterval(2);
 							flagRepo.save(flagging);
 						} else {
 							lastRepo.save(new LastEntry(lastEntry.getId(), accountId, new Date().getTime()));
