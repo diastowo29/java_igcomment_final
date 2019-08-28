@@ -11,6 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.example.model.DataEntry;
+import com.example.model.ErrorLogs;
 import com.example.model.Flag;
 import com.example.model.Interval;
 import com.example.model.LastEntry;
@@ -54,13 +55,14 @@ public class ThreadingTicket extends Thread {
 		Entity ent = new Entity();
 		long lastRun = 0;
 		Flag flagging = flagRepo.findByCifAccountId(accountId);
+		ErrorLogs errLog = errorRepo.findByCifAccountId(accountId);
 		int intv = 0;
 		if (flagging == null) {
 			flagging = newAccountFlag(accountId);
 			Interval interval = intervalRepo.save(new Interval(0, accountId, ent.defaultInterval));
 			lastRepo.save(new LastEntry(0, accountId, new Date().getTime()));
 			try {
-				gettingEntry(FlagStatus.INIT, "0", new Date().getTime(), flagging, interval, false);
+				gettingEntry(FlagStatus.INIT, "0", new Date().getTime(), flagging, interval, false, errLog);
 				flagRepo.save(new Flag(flagging.getId(), accountId, FlagStatus.READY, 0, flagging.getCifDayLimit()));
 			} catch (Exception e) {
 				flagRepo.save(new Flag(flagging.getId(), accountId, FlagStatus.READY, 0, flagging.getCifDayLimit()));
@@ -81,7 +83,7 @@ public class ThreadingTicket extends Thread {
 						LastEntry lastEntry = lastRepo.findByCifAccountId(accountId);
 						lastRun = lastEntry.getCifLastEntry();
 
-						boolean needReauth = gettingEntry(FlagStatus.PROCESSED, "0", lastRun, flagging, interval, false);
+						boolean needReauth = gettingEntry(FlagStatus.PROCESSED, "0", lastRun, flagging, interval, false, errLog);
 
 						if (needReauth) {
 							System.out.println("===== cif need to be reauth ======");
@@ -127,7 +129,7 @@ public class ThreadingTicket extends Thread {
 	}
 
 	public boolean gettingEntry(FlagStatus flagStatus, String nextUrl, long lastRun, Flag flagging, Interval interval,
-			boolean tooMuchComment) throws IOException {
+			boolean tooMuchComment, ErrorLogs errLog) throws IOException {
 		HitApi calling = new HitApi();
 		Entity ent = new Entity();
 		JSONObject allMedia = new JSONObject();
@@ -151,7 +153,7 @@ public class ThreadingTicket extends Thread {
 			}
 
 			try {
-				allMedia = calling.hit(apiUrl, "GET", errorRepo, accountId);
+				allMedia = calling.hit(apiUrl, "GET", errorRepo, accountId, errLog);
 			} catch (RuntimeException e) {
 				e.printStackTrace();
 				flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0,
@@ -291,7 +293,7 @@ public class ThreadingTicket extends Thread {
 													.getString("next");
 
 											JSONObject mediaPaging = getPaging(pageUrl, flagging.getId(),
-													flagging.getCifAccountId());
+													flagging.getCifAccountId(), errLog);
 											if (mediaPaging.has("failed_status")) {
 												if (mediaPaging.get("code").toString()
 														.equals(ResponseCode.BAD_REQUEST.toString())) {
@@ -329,7 +331,7 @@ public class ThreadingTicket extends Thread {
 															mediaPaging = getPaging(
 																	mediaPaging.getJSONObject("paging")
 																			.getString("next"),
-																	flagging.getId(), flagging.getCifAccountId());
+																	flagging.getId(), flagging.getCifAccountId(), errLog);
 															if (mediaPaging.has("failed_status")) {
 																if (mediaPaging.get("code").toString()
 																		.equals(ResponseCode.BAD_REQUEST.toString())) {
@@ -406,7 +408,7 @@ public class ThreadingTicket extends Thread {
 						if (allMedia.has("paging")) {
 							if (allMedia.getJSONObject("paging").has("next")) {
 								gettingEntry(flagStatus, allMedia.getJSONObject("paging").getString("next"), lastRun,
-										flagging, interval, tooMuchComment);
+										flagging, interval, tooMuchComment, errLog);
 							}
 						}
 					}	
@@ -447,10 +449,10 @@ public class ThreadingTicket extends Thread {
 		return continueExt;
 	}
 
-	public JSONObject getPaging(String url, long flagId, String flagAccountId) {
+	public JSONObject getPaging(String url, long flagId, String flagAccountId, ErrorLogs errLog) {
 		JSONObject mediaPaging = new JSONObject();
 		HitApi api = new HitApi();
-		mediaPaging = api.hit(url, "GET", errorRepo, accountId);
+		mediaPaging = api.hit(url, "GET", errorRepo, accountId, errLog);
 		return mediaPaging;
 	}
 

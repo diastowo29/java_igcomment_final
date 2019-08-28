@@ -119,12 +119,12 @@ public class Instagram {
 		ArrayList<HashMap<String, String>> hashList = new ArrayList<>();
 		try {
 
-			JSONObject output = calling.hit(entity.getAccTokenApi(appId, appSecret) + token, "GET", errorRepo, appId +  " - Submit");
+			JSONObject output = calling.hitAuth(entity.getAccTokenApi(appId, appSecret) + token, "GET", errorRepo, appId +  " - Submit");
 			accToken = output.getString("access_token");
 
 			try {
 
-				JSONObject outputAcc = calling.hit(entity.GET_ACC_ID_API + accToken, "GET", errorRepo, appId +  " - Submit");
+				JSONObject outputAcc = calling.hitAuth(entity.GET_ACC_ID_API + accToken, "GET", errorRepo, appId +  " - Submit");
 				JSONArray igData = outputAcc.getJSONArray("data");
 				if (outputAcc != null) {
 					for (int i = 0; i < igData.length(); i++) {
@@ -258,7 +258,6 @@ public class Instagram {
 			}
 			responseCode = HttpStatus.OK;
 		}
-		
 
 		return new ResponseEntity<Object>(response, responseCode);
 	}
@@ -306,11 +305,11 @@ public class Instagram {
 		Entity ent = new Entity();
 
 		if (metadata.getString("option").equals("1")) {
-			postComment = call.hit(
+			postComment = call.hitAuth(
 					ent.createComment(mediaId, URLEncoder.encode(message, "UTF-8"), metadata.getString("token")),
 					"POST", errorRepo, igId +  " - Channelback");
 		} else {
-			postComment = call.hit(
+			postComment = call.hitAuth(
 					ent.replyComment(commentId, URLEncoder.encode(message, "UTF-8"), metadata.getString("token")),
 					"POST", errorRepo, igId +  " - Channelback");
 		}
