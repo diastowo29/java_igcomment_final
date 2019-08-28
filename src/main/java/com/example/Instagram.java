@@ -19,15 +19,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.model.DataEntry;
+import com.example.model.Flag;
+import com.example.others.FlagStatus;
 import com.example.repo.ClientRepository;
 import com.example.repo.DataEntryRepository;
+import com.example.repo.ErrorLogsRepository;
 import com.example.repo.FlagRepository;
 import com.example.repo.IntervalRepository;
 import com.example.repo.LastEntryRepository;
@@ -50,6 +52,8 @@ public class Instagram {
 	DataEntryRepository dataRepo;
 	@Autowired
 	IntervalRepository intervalRepo;
+	@Autowired
+	ErrorLogsRepository errorRepo;
 
 	Entity entity = new Entity();
 	String RETURNURL = "";
@@ -61,16 +65,18 @@ public class Instagram {
 		return "preadmin";
 	}
 
-	/* HANDLE POST REQUEST FROM VIEW, see preadmin.html */
-	@PostMapping(value = "/admin", consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-			MediaType.APPLICATION_JSON_UTF8_VALUE }, produces = { MediaType.APPLICATION_ATOM_XML_VALUE,
-					MediaType.APPLICATION_JSON_UTF8_VALUE })
-	public String newIndex(@RequestParam("appId") String appId, @RequestParam("appSecret") String appSecret,
-			Model model) {
-		model.addAttribute("appId", appId);
-		model.addAttribute("appSecret", appSecret);
-		return "admin";
-	}
+	/* HANDLE POST REQUEST FROM VIEW, see preadmin.html --- NOT USED ANYMORE */
+	/*
+	 * @PostMapping(value = "/admin", consumes = {
+	 * MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+	 * MediaType.APPLICATION_JSON_UTF8_VALUE }, produces = {
+	 * MediaType.APPLICATION_ATOM_XML_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE
+	 * }) public String newIndex(@RequestParam("appId") String
+	 * appId, @RequestParam("appSecret") String appSecret, Model model) {
+	 * 
+	 * System.out.println(" ===== ADMIN CALLED ======"); model.addAttribute("appId",
+	 * appId); model.addAttribute("appSecret", appSecret); return "admin"; }
+	 */
 
 	/*
 	 * @RequestMapping(method = RequestMethod.POST, consumes = {
@@ -88,8 +94,10 @@ public class Instagram {
 	String indexPost(@RequestParam Map<String, String> paramMap, Model model) {
 		RETURNURL = paramMap.get("return_url");
 
-		/*model.addAttribute("appId", entity.APP_ID);
-		model.addAttribute("appSecret", entity.APP_SECRET);*/
+		/*
+		 * model.addAttribute("appId", entity.APP_ID); model.addAttribute("appSecret",
+		 * entity.APP_SECRET);
+		 */
 		model.addAttribute("callbackUrl", entity.CALLBACKURL);
 		return "preadmin";
 	}
@@ -111,12 +119,12 @@ public class Instagram {
 		ArrayList<HashMap<String, String>> hashList = new ArrayList<>();
 		try {
 
-			JSONObject output = calling.hit(entity.getAccTokenApi(appId, appSecret) + token, "GET");
+			JSONObject output = calling.hitAuth(entity.getAccTokenApi(appId, appSecret) + token, "GET", errorRepo, appId +  " - Submit");
 			accToken = output.getString("access_token");
 
 			try {
 
-				JSONObject outputAcc = calling.hit(entity.GET_ACC_ID_API + accToken, "GET");
+				JSONObject outputAcc = calling.hitAuth(entity.GET_ACC_ID_API + accToken, "GET", errorRepo, appId +  " - Submit");
 				JSONArray igData = outputAcc.getJSONArray("data");
 				if (outputAcc != null) {
 					for (int i = 0; i < igData.length(); i++) {
@@ -197,51 +205,61 @@ public class Instagram {
 		// String option = "1";
 
 		List<DataEntry> dataEntry = dataRepo.findByCifAccountId(accountId);
+
+		Flag flagging = flagRepo.findByCifAccountId(accountId);
+		
 		List<DataEntry> willbeDelete = new ArrayList<>();
 		boolean alreadyFull = false;
 		int extCounter = 0;
 
 		System.out.println(dataRepo.count());
+		
+		HttpStatus responseCode;
+		
+		if (flagging.getCifStatus().equals(FlagStatus.REAUTH.toString())) {
+			responseCode = HttpStatus.UNAUTHORIZED;
+		} else {
+			for (int i = 0; i < dataEntry.size(); i++) {
 
-		for (int i = 0; i < dataEntry.size(); i++) {
-
-			@SuppressWarnings("unchecked")
-			ArrayList<Object> cifJsonData = gson.fromJson(dataEntry.get(i).getCifJsonData(), ArrayList.class);
-			if (!alreadyFull) {
-				for (int j = 0; j < cifJsonData.size(); j++) {
-					if (extCounter >= 199) {
-						alreadyFull = true;
-						extResourceRest.add(cifJsonData.get(j));
+				@SuppressWarnings("unchecked")
+				ArrayList<Object> cifJsonData = gson.fromJson(dataEntry.get(i).getCifJsonData(), ArrayList.class);
+				if (!alreadyFull) {
+					for (int j = 0; j < cifJsonData.size(); j++) {
+						if (extCounter >= 199) {
+							alreadyFull = true;
+							extResourceRest.add(cifJsonData.get(j));
+						} else {
+							extResource.add(cifJsonData.get(j));
+							extCounter++;
+						}
+					}
+					if (extResourceRest.size() > 0) {
+						System.out.println("===== UPDATE DB WITH ID: " + dataEntry.get(i).getId() + " =====");
+						doSaveDataEntryDb(dataEntry.get(i).getId(), dataEntry.get(i).getCifAccountId(),
+								dataEntry.get(i).getCifPostId(), extResourceRest);
+						extResourceRest = new ArrayList<>();
 					} else {
-						extResource.add(cifJsonData.get(j));
-						extCounter++;
+						willbeDelete.add(dataEntry.get(i));
 					}
 				}
-				if (extResourceRest.size() > 0) {
-					System.out.println("===== UPDATE DB WITH ID: " + dataEntry.get(i).getId() + " =====");
-					doSaveDataEntryDb(dataEntry.get(i).getId(), dataEntry.get(i).getCifAccountId(),
-							dataEntry.get(i).getCifPostId(), extResourceRest);
-					extResourceRest = new ArrayList<>();
-				} else {
-					willbeDelete.add(dataEntry.get(i));
-				}
 			}
-		}
-		response.put("external_resources", extResource);
+			response.put("external_resources", extResource);
 
-		for (int i = 0; i < willbeDelete.size(); i++) {
-			dataRepo.delete(willbeDelete.get(i));
+			for (int i = 0; i < willbeDelete.size(); i++) {
+				dataRepo.delete(willbeDelete.get(i));
+			}
+
+			if (dataRepo.count() <= 2) {
+				ThreadingTicket ticketThread = new ThreadingTicket(accountId, token, option, flagRepo, lastRepo, dataRepo,
+						intervalRepo, errorRepo);
+				ticketThread.start();
+			} else {
+				System.out.println("===== Still too many rows at DB =====");
+			}
+			responseCode = HttpStatus.OK;
 		}
 
-		if (dataRepo.count() <= 2) {
-			ThreadingTicket ticketThread = new ThreadingTicket(accountId, token, option, flagRepo, lastRepo, dataRepo,
-					intervalRepo);
-			ticketThread.start();
-		} else {
-			System.out.println("===== Still too many rows at DB =====");
-		}
-
-		return new ResponseEntity<Object>(response, HttpStatus.OK);
+		return new ResponseEntity<Object>(response, responseCode);
 	}
 
 	private void doSaveDataEntryDb(long id, String accountId, String postId, ArrayList<Object> extResource) {
@@ -287,13 +305,13 @@ public class Instagram {
 		Entity ent = new Entity();
 
 		if (metadata.getString("option").equals("1")) {
-			postComment = call.hit(
+			postComment = call.hitAuth(
 					ent.createComment(mediaId, URLEncoder.encode(message, "UTF-8"), metadata.getString("token")),
-					"POST");
+					"POST", errorRepo, igId +  " - Channelback");
 		} else {
-			postComment = call.hit(
+			postComment = call.hitAuth(
 					ent.replyComment(commentId, URLEncoder.encode(message, "UTF-8"), metadata.getString("token")),
-					"POST");
+					"POST", errorRepo, igId +  " - Channelback");
 		}
 
 		HashMap<String, Object> response = new HashMap<>();
