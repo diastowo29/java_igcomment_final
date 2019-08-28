@@ -107,8 +107,9 @@ public class ThreadingTicket extends Thread {
 						}
 					}
 				} else if (flagging.getCifStatus().equals(FlagStatus.REAUTH.toString())) {
-					flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 2,
-							flagging.getCifDayLimit()));
+					flagging.setCifStatus(FlagStatus.READY);
+					flagging.setCifInterval(2);
+					flagRepo.save(flagging);
 				} else {
 					System.out.println("===== PLEASE WAIT, ITS STILL RUNNING =====");
 				}
