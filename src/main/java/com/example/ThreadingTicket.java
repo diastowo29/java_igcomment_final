@@ -151,7 +151,7 @@ public class ThreadingTicket extends Thread {
 			}
 
 			try {
-				allMedia = calling.hit(apiUrl, "GET", errorRepo);
+				allMedia = calling.hit(apiUrl, "GET", errorRepo, accountId);
 			} catch (RuntimeException e) {
 				e.printStackTrace();
 				flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0,
@@ -450,7 +450,7 @@ public class ThreadingTicket extends Thread {
 	public JSONObject getPaging(String url, long flagId, String flagAccountId) {
 		JSONObject mediaPaging = new JSONObject();
 		HitApi api = new HitApi();
-		mediaPaging = api.hit(url, "GET", errorRepo);
+		mediaPaging = api.hit(url, "GET", errorRepo, accountId);
 		return mediaPaging;
 	}
 

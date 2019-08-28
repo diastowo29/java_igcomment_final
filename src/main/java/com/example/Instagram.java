@@ -119,12 +119,12 @@ public class Instagram {
 		ArrayList<HashMap<String, String>> hashList = new ArrayList<>();
 		try {
 
-			JSONObject output = calling.hit(entity.getAccTokenApi(appId, appSecret) + token, "GET", errorRepo);
+			JSONObject output = calling.hit(entity.getAccTokenApi(appId, appSecret) + token, "GET", errorRepo, appId +  " - Submit");
 			accToken = output.getString("access_token");
 
 			try {
 
-				JSONObject outputAcc = calling.hit(entity.GET_ACC_ID_API + accToken, "GET", errorRepo);
+				JSONObject outputAcc = calling.hit(entity.GET_ACC_ID_API + accToken, "GET", errorRepo, appId +  " - Submit");
 				JSONArray igData = outputAcc.getJSONArray("data");
 				if (outputAcc != null) {
 					for (int i = 0; i < igData.length(); i++) {
@@ -308,11 +308,11 @@ public class Instagram {
 		if (metadata.getString("option").equals("1")) {
 			postComment = call.hit(
 					ent.createComment(mediaId, URLEncoder.encode(message, "UTF-8"), metadata.getString("token")),
-					"POST", errorRepo);
+					"POST", errorRepo, igId +  " - Channelback");
 		} else {
 			postComment = call.hit(
 					ent.replyComment(commentId, URLEncoder.encode(message, "UTF-8"), metadata.getString("token")),
-					"POST", errorRepo);
+					"POST", errorRepo, igId +  " - Channelback");
 		}
 
 		HashMap<String, Object> response = new HashMap<>();

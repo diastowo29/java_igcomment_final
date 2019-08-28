@@ -8,6 +8,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,7 +18,7 @@ import com.example.model.ErrorLogs;
 import com.example.repo.ErrorLogsRepository;
 
 public class HitApi {
-	public JSONObject hit(String newUrl, String method, ErrorLogsRepository errorRepo) {
+	public JSONObject hit(String newUrl, String method, ErrorLogsRepository errorRepo, String accountId) {
 		JSONObject response = new JSONObject();
 		try {
 			System.out.println("CALLING " + method + ": " + newUrl);
@@ -28,11 +30,14 @@ public class HitApi {
 				System.out.println("HTTP ERROR:");
 				System.out.println(conn.getResponseMessage());
 				response = null;
-				// throw new RuntimeException("Failed : HTTP error code : " +
-				// conn.getResponseCode());
-				errorRepo.save(new ErrorLogs(0, "", conn.getResponseMessage() + " - " + conn.getResponseCode(), method));
-				
-				response = new JSONObject().put("failed_status", "error").put("code", String.valueOf(conn.getResponseCode())).put("message", conn.getResponseMessage());
+				DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+				LocalDateTime now = LocalDateTime.now();
+				errorRepo.save(new ErrorLogs(0, accountId,
+						conn.getResponseMessage() + " - " + conn.getResponseCode() + " - " + dtf.format(now).toString(),
+						method));
+
+				response = new JSONObject().put("failed_status", "error")
+						.put("code", String.valueOf(conn.getResponseCode())).put("message", conn.getResponseMessage());
 			}
 			System.out.println("Output from Server .... \n");
 			BufferedReader rd = new BufferedReader(
