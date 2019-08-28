@@ -1,14 +1,14 @@
 package com.example.others;
 
-public enum FlagStatus {
-	READY {
+public enum ResponseCode {
+	BAD_REQUEST {
 		public String toString() {
-			return "READY";
+			return "400";
 		}
 	},
-	WAIT {
+	INTERNAL_SERVER_ERROR {
 		public String toString() {
-			return "WAIT";
+			return "500";
 		}
 	},
 	INIT {
@@ -20,10 +20,5 @@ public enum FlagStatus {
 		public String toString() {
 			return "PROCESSED";
 		}
-	},
-	REAUTH {
-		public String toString() {
-			return "REAUTH";
-		}
-	},
+	}
 }

@@ -56,7 +56,22 @@ public class Flag implements Serializable {
 		return cifDayLimit;
 	}
 	
-
+	public void setCifAccountId(String cifAccountId) {
+		this.cifAccountId = cifAccountId;
+	}
+	
+	public void setCifStatus(FlagStatus cifStatus) {
+		this.cifStatus = cifStatus.toString();
+	}
+	
+	public void setCifInterval(int cifInterval) {
+		this.cifInterval = cifInterval;
+	}
+	
+	public void setCifDayLimit(int cifDayLimit) {
+		this.cifDayLimit = cifDayLimit;
+	}
+	
 	protected Flag() {
 
 	}
