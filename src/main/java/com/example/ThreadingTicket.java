@@ -81,11 +81,17 @@ public class ThreadingTicket extends Thread {
 						LastEntry lastEntry = lastRepo.findByCifAccountId(accountId);
 						lastRun = lastEntry.getCifLastEntry();
 
-						gettingEntry(FlagStatus.PROCESSED, "0", lastRun, flagging, interval, false);
+						boolean needReauth = gettingEntry(FlagStatus.PROCESSED, "0", lastRun, flagging, interval, false);
 
-						lastRepo.save(new LastEntry(lastEntry.getId(), accountId, new Date().getTime()));
-						flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0,
-								flagging.getCifDayLimit()));
+						if (needReauth) {
+							System.out.println("===== cif need to be reauth ======");
+							flagging.setCifStatus(FlagStatus.REAUTH);
+							flagRepo.save(flagging);
+						} else {
+							lastRepo.save(new LastEntry(lastEntry.getId(), accountId, new Date().getTime()));
+							flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0,
+									flagging.getCifDayLimit()));
+						}
 					} else {
 						if (flagging.getCifInterval() > 2) {
 							flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 2,
@@ -119,7 +125,7 @@ public class ThreadingTicket extends Thread {
 		return flagging;
 	}
 
-	public void gettingEntry(FlagStatus flagStatus, String nextUrl, long lastRun, Flag flagging, Interval interval,
+	public boolean gettingEntry(FlagStatus flagStatus, String nextUrl, long lastRun, Flag flagging, Interval interval,
 			boolean tooMuchComment) throws IOException {
 		HitApi calling = new HitApi();
 		Entity ent = new Entity();
@@ -128,6 +134,7 @@ public class ThreadingTicket extends Thread {
 		int commentLimit = 198;
 
 		boolean thatsAll = false;
+		boolean needReauth = false;
 
 		String apiUrl = "";
 		HashMap<String, Object> extObj = new HashMap<>();
@@ -151,14 +158,16 @@ public class ThreadingTicket extends Thread {
 			}
 			if (allMedia.has("failed_status")) {
 				if (allMedia.get("code").toString().equals(ResponseCode.BAD_REQUEST.toString())) {
-					System.out.println("=== " + flagging.getId() + " " + flagging.getCifAccountId()
-							+ " need re-auth === " + FlagStatus.REAUTH);
-
-					flagging.setCifStatus(FlagStatus.REAUTH);
-					Flag newFlag = flagRepo.save(flagging);
-					System.out.println(newFlag.getCifStatus());
-					System.out.println(newFlag.getCifAccountId());
-					System.out.println(newFlag.getId());
+					/*
+					 * System.out.println("=== " + flagging.getId() + " " +
+					 * flagging.getCifAccountId() + " need re-auth === " + FlagStatus.REAUTH);
+					 * 
+					 * flagging.setCifStatus(FlagStatus.REAUTH); Flag newFlag =
+					 * flagRepo.save(flagging); System.out.println(newFlag.getCifStatus());
+					 * System.out.println(newFlag.getCifAccountId());
+					 * System.out.println(newFlag.getId());
+					 */
+					needReauth = true;
 				}
 			} else {
 				if (allMedia.has("data")) {
@@ -285,8 +294,13 @@ public class ThreadingTicket extends Thread {
 											if (mediaPaging.has("failed_status")) {
 												if (mediaPaging.get("code").toString()
 														.equals(ResponseCode.BAD_REQUEST.toString())) {
-													flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(),
-															FlagStatus.REAUTH, 0, flagging.getCifDayLimit()));
+													/*
+													 * flagRepo.save(new Flag(flagging.getId(),
+													 * flagging.getCifAccountId(), FlagStatus.REAUTH, 0,
+													 * flagging.getCifDayLimit()));
+													 */
+
+													needReauth = true;
 												}
 											} else {
 												for (int p = 0; p < mediaPaging.getJSONArray("data").length(); p++) {
@@ -318,10 +332,13 @@ public class ThreadingTicket extends Thread {
 															if (mediaPaging.has("failed_status")) {
 																if (mediaPaging.get("code").toString()
 																		.equals(ResponseCode.BAD_REQUEST.toString())) {
-																	flagRepo.save(new Flag(flagging.getId(),
-																			flagging.getCifAccountId(),
-																			FlagStatus.REAUTH, 0,
-																			flagging.getCifDayLimit()));
+																	/*
+																	 * flagRepo.save(new Flag(flagging.getId(),
+																	 * flagging.getCifAccountId(), FlagStatus.REAUTH, 0,
+																	 * flagging.getCifDayLimit()));
+																	 */
+
+																	needReauth = true;
 																}
 															} else {
 																for (int p = 0; p < mediaPaging.getJSONArray("data")
@@ -383,13 +400,15 @@ public class ThreadingTicket extends Thread {
 						}
 					}
 				}
-				if (!thatsAll) {
-					if (allMedia.has("paging")) {
-						if (allMedia.getJSONObject("paging").has("next")) {
-							gettingEntry(flagStatus, allMedia.getJSONObject("paging").getString("next"), lastRun,
-									flagging, interval, tooMuchComment);
+				if (!needReauth) {
+					if (!thatsAll) {
+						if (allMedia.has("paging")) {
+							if (allMedia.getJSONObject("paging").has("next")) {
+								gettingEntry(flagStatus, allMedia.getJSONObject("paging").getString("next"), lastRun,
+										flagging, interval, tooMuchComment);
+							}
 						}
-					}
+					}	
 				}
 			}
 
@@ -398,6 +417,7 @@ public class ThreadingTicket extends Thread {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
+		return needReauth;
 	}
 
 	private void doSaveDb(long i, String accountId, String id, ArrayList<Object> extResource) {
