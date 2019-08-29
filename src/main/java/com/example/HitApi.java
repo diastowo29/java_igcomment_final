@@ -36,10 +36,6 @@ public class HitApi {
 				errorRepo.save(new ErrorLogs(0, accountId,
 						conn.getResponseMessage() + " - " + conn.getResponseCode() + " - " + dtf.format(now).toString(),
 						method));
-				/*
-				 * errorRepo.save(new ErrorLogs(0, accountId, conn.getResponseMessage() + " - "
-				 * + conn.getResponseCode() + " - " + dtf.format(now).toString(), method));
-				 */
 
 				response = new JSONObject().put("failed_status", "error")
 						.put("code", String.valueOf(conn.getResponseCode())).put("message", conn.getResponseMessage());
