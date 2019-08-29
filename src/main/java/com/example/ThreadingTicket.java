@@ -63,9 +63,15 @@ public class ThreadingTicket extends Thread {
 			lastRepo.save(new LastEntry(0, accountId, new Date().getTime()));
 			try {
 				gettingEntry(FlagStatus.INIT, "0", new Date().getTime(), flagging, interval, false, errLog);
-				flagRepo.save(new Flag(flagging.getId(), accountId, FlagStatus.READY, 0, flagging.getCifDayLimit()));
+				flagging.setCifAccountId(accountId);
+				flagging.setCifStatus(FlagStatus.READY);
+				flagging.setCifInterval(0);
+				flagRepo.save(flagging);
 			} catch (Exception e) {
-				flagRepo.save(new Flag(flagging.getId(), accountId, FlagStatus.READY, 0, flagging.getCifDayLimit()));
+				flagging.setCifAccountId(accountId);
+				flagging.setCifStatus(FlagStatus.READY);
+				flagging.setCifInterval(0);
+				flagRepo.save(flagging);
 			}
 		} else {
 			try {
@@ -78,12 +84,15 @@ public class ThreadingTicket extends Thread {
 						intv = interval.getCifInterval();
 					}
 					if (flagging.getCifInterval() == intv) {
-						flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.WAIT, 0,
-								flagging.getCifDayLimit()));
+
+						flagging.setCifStatus(FlagStatus.WAIT);
+						flagRepo.save(flagging);
+
 						LastEntry lastEntry = lastRepo.findByCifAccountId(accountId);
 						lastRun = lastEntry.getCifLastEntry();
 
-						boolean needReauth = gettingEntry(FlagStatus.PROCESSED, "0", lastRun, flagging, interval, false, errLog);
+						boolean needReauth = gettingEntry(FlagStatus.PROCESSED, "0", lastRun, flagging, interval, false,
+								errLog);
 
 						if (needReauth) {
 							System.out.println("===== cif need to be reauth ======");
@@ -92,16 +101,23 @@ public class ThreadingTicket extends Thread {
 							flagRepo.save(flagging);
 						} else {
 							lastRepo.save(new LastEntry(lastEntry.getId(), accountId, new Date().getTime()));
-							flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0,
-									flagging.getCifDayLimit()));
+							flagging.setCifStatus(FlagStatus.READY);
+							flagging.setCifInterval(0);
+							flagRepo.save(flagging);
 						}
 					} else {
 						if (flagging.getCifInterval() > 2) {
-							flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 2,
-									flagging.getCifDayLimit()));
+
+							flagging.setCifStatus(FlagStatus.READY);
+							flagging.setCifInterval(2);
+							flagRepo.save(flagging);
+
 						} else {
-							flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY,
-									(flagging.getCifInterval() + 1), flagging.getCifDayLimit()));
+
+							flagging.setCifStatus(FlagStatus.READY);
+							flagging.setCifInterval(flagging.getCifInterval() + 1);
+							flagRepo.save(flagging);
+
 							System.out
 									.println("===== WAIT FOR INTERVAL: " + (flagging.getCifInterval() + 1) + " =====");
 						}
@@ -115,8 +131,10 @@ public class ThreadingTicket extends Thread {
 				}
 			} catch (Exception e) {
 				e.getLocalizedMessage();
-				flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0,
-						flagging.getCifDayLimit()));
+
+				flagging.setCifStatus(FlagStatus.READY);
+				flagging.setCifInterval(0);
+				flagRepo.save(flagging);
 			}
 		}
 
@@ -162,15 +180,6 @@ public class ThreadingTicket extends Thread {
 			}
 			if (allMedia.has("failed_status")) {
 				if (allMedia.get("code").toString().equals(ResponseCode.BAD_REQUEST.toString())) {
-					/*
-					 * System.out.println("=== " + flagging.getId() + " " +
-					 * flagging.getCifAccountId() + " need re-auth === " + FlagStatus.REAUTH);
-					 * 
-					 * flagging.setCifStatus(FlagStatus.REAUTH); Flag newFlag =
-					 * flagRepo.save(flagging); System.out.println(newFlag.getCifStatus());
-					 * System.out.println(newFlag.getCifAccountId());
-					 * System.out.println(newFlag.getId());
-					 */
 					needReauth = true;
 				}
 			} else {
@@ -373,17 +382,22 @@ public class ThreadingTicket extends Thread {
 															}
 														} catch (RuntimeException e) {
 															e.printStackTrace();
-															flagRepo.save(new Flag(flagging.getId(),
-																	flagging.getCifAccountId(), FlagStatus.READY, 0,
-																	flagging.getCifDayLimit()));
+
+															flagging.setCifStatus(FlagStatus.READY);
+															flagging.setCifInterval(0);
+															flagRepo.save(flagging);
+															
 														}
 													}
 												}
 											}
 										} catch (RuntimeException e) {
 											e.printStackTrace();
-											flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(),
-													FlagStatus.READY, 0, flagging.getCifDayLimit()));
+
+											flagging.setCifStatus(FlagStatus.READY);
+											flagging.setCifInterval(0);
+											flagRepo.save(flagging);
+											
 										}
 									}
 								}
