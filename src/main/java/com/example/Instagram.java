@@ -99,6 +99,7 @@ public class Instagram {
 		 * entity.APP_SECRET);
 		 */
 		model.addAttribute("callbackUrl", entity.CALLBACKURL);
+		System.out.println(entity.CALLBACKURL);
 		return "preadmin";
 	}
 
