@@ -217,6 +217,7 @@ public class Instagram {
 		
 		HttpStatus responseCode;
 		
+		
 		if (flagging.getCifStatus().equals(FlagStatus.REAUTH.toString())) {
 			responseCode = HttpStatus.UNAUTHORIZED;
 		} else {
