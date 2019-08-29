@@ -107,17 +107,13 @@ public class ThreadingTicket extends Thread {
 						}
 					} else {
 						if (flagging.getCifInterval() > 2) {
-
 							flagging.setCifStatus(FlagStatus.READY);
 							flagging.setCifInterval(2);
 							flagRepo.save(flagging);
-
 						} else {
-
 							flagging.setCifStatus(FlagStatus.READY);
 							flagging.setCifInterval(flagging.getCifInterval() + 1);
 							flagRepo.save(flagging);
-
 							System.out
 									.println("===== WAIT FOR INTERVAL: " + (flagging.getCifInterval() + 1) + " =====");
 						}
