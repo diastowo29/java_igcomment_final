@@ -183,7 +183,11 @@ public class ThreadingTicket extends Thread {
 								.getString("username"));
 						extObj = new HashMap<>();
 						extObj.put("external_id", "cif-media-" + parentMedia);
-						extObj.put("message", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
+						try {
+							extObj.put("message", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));	
+						} catch (JSONException e) {
+							extObj.put("message", "Post without caption");
+						}
 						extObj.put("created_at", allMedia.getJSONArray("data").getJSONObject(i).getString("timestamp")
 								.replace("+0000", "Z"));
 
@@ -200,8 +204,11 @@ public class ThreadingTicket extends Thread {
 						displayArray.add(displayInfo);
 						displayObject = new HashMap<>();
 						displayInfo = new HashMap<>();
-						displayObject.put("media_caption",
-								allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
+						try {
+							displayObject.put("media_caption", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
+						} catch (JSONException e) {
+							displayObject.put("media_caption", "Post without caption");
+						}
 						displayInfo.put("type", "cif-caption-" + parentMedia);
 						displayInfo.put("data", displayObject);
 						displayArray.add(displayInfo);
@@ -317,13 +324,6 @@ public class ThreadingTicket extends Thread {
 								}
 							}
 						}
-						/*
-						 * HashMap<String, Object> response = new HashMap<>();
-						 * response.put("external_resources", extResource); System.out.println(new
-						 * JSONObject(response)); DataEntry dataEntry = dataRepo
-						 * .findByCifPostId(allMedia.getJSONArray("data").getJSONObject(i).getString(
-						 * "id"));
-						 */
 						try {
 
 							doSaveDb(0, accountId, allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
@@ -349,15 +349,7 @@ public class ThreadingTicket extends Thread {
 				}
 			}
 
-			/*
-			 * if (tooMuchComment) { intervalRepo.save(new Interval(interval.getId(),
-			 * interval.getCifAccountId(), ent.defaultInterval + 3)); } else {
-			 * intervalRepo.save(new Interval(interval.getId(), interval.getCifAccountId(),
-			 * ent.defaultInterval)); }
-			 */
-		} catch (JSONException e) {
-			e.printStackTrace();
-		} catch (ParseException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -422,7 +414,11 @@ public class ThreadingTicket extends Thread {
 		displayArray.add(displayInfo);
 		displayObject = new HashMap<>();
 		displayInfo = new HashMap<>();
-		displayObject.put("media_caption", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
+		try {
+			displayObject.put("media_caption", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
+		} catch (JSONException e) {
+			displayObject.put("media_caption", "Post without caption");	
+		}
 		displayInfo.put("type", "cif-caption-" + parentMedia);
 		displayInfo.put("data", displayObject);
 		displayArray.add(displayInfo);
@@ -483,7 +479,11 @@ public class ThreadingTicket extends Thread {
 		displayArray.add(displayInfo);
 		displayObject = new HashMap<>();
 		displayInfo = new HashMap<>();
-		displayObject.put("media_caption", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
+		try {
+			displayObject.put("media_caption", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
+		} catch (JSONException e) {
+			displayObject.put("media_caption", "Post without caption");
+		}
 		displayInfo.put("type", "cif-caption-" + parentMedia);
 		displayInfo.put("data", displayObject);
 		displayArray.add(displayInfo);
