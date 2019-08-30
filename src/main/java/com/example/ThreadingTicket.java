@@ -493,11 +493,7 @@ public class ThreadingTicket extends Thread {
 		displayArray.add(displayInfo);
 		displayObject = new HashMap<>();
 		displayInfo = new HashMap<>();
-		try {
-			displayObject.put("media_caption", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
-		} catch (JSONException e) {
-			displayObject.put("media_caption", "Post without caption");	
-		}
+		displayObject.put("media_caption", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
 		displayInfo.put("type", "cif-caption-" + parentMedia);
 		displayInfo.put("data", displayObject);
 		displayArray.add(displayInfo);
@@ -558,11 +554,7 @@ public class ThreadingTicket extends Thread {
 		displayArray.add(displayInfo);
 		displayObject = new HashMap<>();
 		displayInfo = new HashMap<>();
-		try {
-			displayObject.put("media_caption", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
-		} catch (JSONException e) {
-			displayObject.put("media_caption", "Post without caption");
-		}
+		displayObject.put("media_caption", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
 		displayInfo.put("type", "cif-caption-" + parentMedia);
 		displayInfo.put("data", displayObject);
 		displayArray.add(displayInfo);
