@@ -219,7 +219,11 @@ public class ThreadingTicket extends Thread {
 									.getString("username"));
 							extObj = new HashMap<>();
 							extObj.put("external_id", "cif-media-" + parentMedia);
-							extObj.put("message", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
+							try {
+								extObj.put("message", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
+							} catch (Exception e) {
+								extObj.put("message", "Post without caption");
+							}
 							extObj.put("created_at", allMedia.getJSONArray("data").getJSONObject(i)
 									.getString("timestamp").replace("+0000", "Z"));
 
@@ -236,8 +240,11 @@ public class ThreadingTicket extends Thread {
 							displayArray.add(displayInfo);
 							displayObject = new HashMap<>();
 							displayInfo = new HashMap<>();
-							displayObject.put("media_caption",
-									allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
+							try {
+								displayObject.put("media_caption", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
+							} catch (JSONException e) {
+								displayObject.put("media_caption", "Post without caption");	
+							}
 							displayInfo.put("type", "cif-caption-" + parentMedia);
 							displayInfo.put("data", displayObject);
 							displayArray.add(displayInfo);
