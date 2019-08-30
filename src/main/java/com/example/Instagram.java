@@ -216,6 +216,10 @@ public class Instagram {
 		
 		HttpStatus responseCode;
 		
+		if (flagging == null) {
+			flagging = newAccountFlag(accountId);
+		}
+		
 		if (flagging.getCifStatus().equals(FlagStatus.REAUTH.toString())) {
 			responseCode = HttpStatus.UNAUTHORIZED;
 		} else {
@@ -260,6 +264,11 @@ public class Instagram {
 		}
 
 		return new ResponseEntity<Object>(response, responseCode);
+	}
+	
+	public Flag newAccountFlag(String accountId) {
+		Flag flagging = flagRepo.save(new Flag(0, accountId, FlagStatus.NEW, 0, 3));
+		return flagging;
 	}
 
 	private void doSaveDataEntryDb(long id, String accountId, String postId, ArrayList<Object> extResource) {

@@ -1,6 +1,11 @@
 package com.example.others;
 
 public enum FlagStatus {
+	NEW {
+		public String toString() {
+			return "NEW";
+		}
+	},
 	READY {
 		public String toString() {
 			return "READY";

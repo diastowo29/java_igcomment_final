@@ -21,7 +21,7 @@ public class HitApi {
 	public JSONObject hitAuth(String newUrl, String method, ErrorLogsRepository errorRepo, String accountId) {
 		JSONObject response = new JSONObject();
 		try {
-			System.out.println("CALLING " + method + ": " + newUrl);
+			System.out.println("CALLING " + method);
 			URL url = new URL(newUrl);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod(method);
@@ -50,18 +50,9 @@ public class HitApi {
 
 		} catch (MalformedURLException e) {
 
-			// e.printStackTrace();
-			// System.out.println(e.getLocalizedMessage());
-
 		} catch (IOException e) {
 
-			// e.printStackTrace();
-			// System.out.println(e.getLocalizedMessage());
-
 		} catch (JSONException e) {
-
-			// e.printStackTrace();
-			// System.out.println(e.getLocalizedMessage());
 
 		}
 
@@ -72,7 +63,7 @@ public class HitApi {
 			ErrorLogs errLog) {
 		JSONObject response = new JSONObject();
 		try {
-			System.out.println("CALLING " + method + ": " + newUrl);
+			System.out.println("CALLING " + method);
 			URL url = new URL(newUrl);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod(method);
@@ -93,10 +84,6 @@ public class HitApi {
 					errLog.setStacktrace(method);
 					errorRepo.save(errLog);
 				}
-				/*
-				 * errorRepo.save(new ErrorLogs(0, accountId, conn.getResponseMessage() + " - "
-				 * + conn.getResponseCode() + " - " + dtf.format(now).toString(), method));
-				 */
 
 				response = new JSONObject().put("failed_status", "error")
 						.put("code", String.valueOf(conn.getResponseCode())).put("message", conn.getResponseMessage());
@@ -110,20 +97,11 @@ public class HitApi {
 			conn.disconnect();
 
 		} catch (MalformedURLException e) {
-
-			// e.printStackTrace();
-			// System.out.println(e.getLocalizedMessage());
-
+			
 		} catch (IOException e) {
-
-			// e.printStackTrace();
-			// System.out.println(e.getLocalizedMessage());
-
+			
 		} catch (JSONException e) {
-
-			// e.printStackTrace();
-			// System.out.println(e.getLocalizedMessage());
-
+			
 		}
 
 		return response;

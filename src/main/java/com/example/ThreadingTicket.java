@@ -57,8 +57,7 @@ public class ThreadingTicket extends Thread {
 		Flag flagging = flagRepo.findByCifAccountId(accountId);
 		ErrorLogs errLog = errorRepo.findByCifAccountId(accountId);
 		int intv = 0;
-		if (flagging == null) {
-			flagging = newAccountFlag(accountId);
+		if (flagging.getCifStatus().equals(FlagStatus.NEW.toString())) {
 			Interval interval = intervalRepo.save(new Interval(0, accountId, ent.defaultInterval));
 			lastRepo.save(new LastEntry(0, accountId, new Date().getTime()));
 			try {
