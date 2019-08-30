@@ -36,6 +36,8 @@ public class ThreadingTicket extends Thread {
 	ErrorLogsRepository errorRepo;
 
 	boolean tooMuchComment = false;
+	
+	
 
 	public ThreadingTicket(String accountId, String token, String option, FlagRepository flagRepo,
 			LastEntryRepository lastRepo, DataEntryRepository dataRepo, IntervalRepository intervalRepo,
