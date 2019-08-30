@@ -21,7 +21,7 @@ public class HitApi {
 	public JSONObject hitAuth(String newUrl, String method, ErrorLogsRepository errorRepo, String accountId) {
 		JSONObject response = new JSONObject();
 		try {
-			System.out.println("CALLING " + method + ": " + newUrl);
+			System.out.println("CALLING " + method);
 			URL url = new URL(newUrl);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod(method);
@@ -72,7 +72,7 @@ public class HitApi {
 			ErrorLogs errLog) {
 		JSONObject response = new JSONObject();
 		try {
-			System.out.println("CALLING " + method + ": " + newUrl);
+			System.out.println("CALLING " + method);
 			URL url = new URL(newUrl);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod(method);
