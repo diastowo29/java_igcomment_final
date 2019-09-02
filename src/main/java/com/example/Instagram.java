@@ -326,7 +326,7 @@ public class Instagram {
 
 		HashMap<String, Object> response = new HashMap<>();
 
-		if (postComment.has("")) {
+		if (postComment.has("failed_status")) {
 			reponseCode = HttpStatus.INTERNAL_SERVER_ERROR;
 		} else {
 			reponseCode = HttpStatus.OK;
