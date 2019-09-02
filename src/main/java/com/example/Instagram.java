@@ -199,10 +199,6 @@ public class Instagram {
 		String accountId = jobject.getString("igId");
 		String token = jobject.getString("token");
 		String option = jobject.getString("option");
-		// String accountId = "17841406514405225";
-		// String token =
-		// "EAAFWflehVNwBAHzKh6ahR4NfmZCLy258qmjDo067JDMoiKaO36lbAk0aD2WAgd7lxR7Hx1Mf9hWy312pyXUsMCRgXv76FziZBgy5rVphRFZBCRVelF1jb9Rqm6983xdeYMPCrZBnlawVRYdReXqyQKNFtXjUqC8ZD";
-		// String option = "1";
 
 		List<DataEntry> dataEntry = dataRepo.findByCifAccountId(accountId);
 
