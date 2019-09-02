@@ -217,6 +217,9 @@ public class Instagram {
 		
 		HttpStatus responseCode;
 		
+		if (flagging == null) {
+			flagging = newAccountFlag(accountId);
+		}
 		
 		if (flagging.getCifStatus().equals(FlagStatus.REAUTH.toString())) {
 			responseCode = HttpStatus.UNAUTHORIZED;
@@ -263,6 +266,11 @@ public class Instagram {
 
 		return new ResponseEntity<Object>(response, responseCode);
 	}
+	
+	public Flag newAccountFlag(String accountId) {
+		Flag flagging = flagRepo.save(new Flag(0, accountId, FlagStatus.NEW, 0, 3));
+		return flagging;
+	}
 
 	private void doSaveDataEntryDb(long id, String accountId, String postId, ArrayList<Object> extResource) {
 		Gson gson = new Gson();
@@ -298,7 +306,6 @@ public class Instagram {
 		/* GET COMMENT ID */
 		String commentId = paramMap.get("parent_id").split("-")[2];
 		String mediaId = paramMap.get("thread_id").split("-")[2];
-		// String mediaUrl = paramMap.get("thread_id").split("-")[4];
 		String igId = paramMap.get("thread_id").split("-")[3];
 		String message = paramMap.get("message").toString();
 		JSONObject metadata = new JSONObject(paramMap.get("metadata").toString());
@@ -306,21 +313,29 @@ public class Instagram {
 		HitApi call = new HitApi();
 		Entity ent = new Entity();
 
+		HttpStatus reponseCode;
+
 		if (metadata.getString("option").equals("1")) {
 			postComment = call.hitAuth(
 					ent.createComment(mediaId, URLEncoder.encode(message, "UTF-8"), metadata.getString("token")),
-					"POST", errorRepo, igId +  " - Channelback");
+					"POST", errorRepo, igId + " - Channelback");
 		} else {
 			postComment = call.hitAuth(
 					ent.replyComment(commentId, URLEncoder.encode(message, "UTF-8"), metadata.getString("token")),
-					"POST", errorRepo, igId +  " - Channelback");
+					"POST", errorRepo, igId + " - Channelback");
 		}
 
 		HashMap<String, Object> response = new HashMap<>();
-		response.put("external_id", "cif-comment-" + postComment.getString("id") + "-" + igId /* + "-" + mediaUrl */);
-		response.put("allow_channelback", true);
 
-		return new ResponseEntity<Object>(response, HttpStatus.OK);
+		if (postComment.has("failed_status")) {
+			reponseCode = HttpStatus.INTERNAL_SERVER_ERROR;
+		} else {
+			reponseCode = HttpStatus.OK;
+			response.put("external_id", "cif-comment-" + postComment.getString("id") + "-" + igId);
+			response.put("allow_channelback", true);
+		}
+
+		return new ResponseEntity<Object>(response, reponseCode);
 	}
 
 	@RequestMapping("/saveclient")
