@@ -12,7 +12,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -66,29 +65,6 @@ public class Instagram {
 		return "preadmin";
 	}
 
-	/* HANDLE POST REQUEST FROM VIEW, see preadmin.html --- NOT USED ANYMORE */
-	/*
-	 * @PostMapping(value = "/admin", consumes = {
-	 * MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-	 * MediaType.APPLICATION_JSON_UTF8_VALUE }, produces = {
-	 * MediaType.APPLICATION_ATOM_XML_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE
-	 * }) public String newIndex(@RequestParam("appId") String
-	 * appId, @RequestParam("appSecret") String appSecret, Model model) {
-	 * 
-	 * System.out.println(" ===== ADMIN CALLED ======"); model.addAttribute("appId",
-	 * appId); model.addAttribute("appSecret", appSecret); return "admin"; }
-	 */
-
-	/*
-	 * @RequestMapping(method = RequestMethod.POST, consumes = {
-	 * MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-	 * MediaType.APPLICATION_JSON_UTF8_VALUE }, produces = {
-	 * MediaType.APPLICATION_ATOM_XML_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE
-	 * }) String indexPost(@RequestParam Map<String, String> paramMap) {
-	 * System.out.println("/post"); RETURNURL = paramMap.get("return_url");
-	 * System.out.println(RETURNURL); return "preadmin"; }
-	 */
-
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE,
 			MediaType.APPLICATION_JSON_UTF8_VALUE }, produces = { MediaType.APPLICATION_ATOM_XML_VALUE,
 					MediaType.APPLICATION_JSON_UTF8_VALUE })
@@ -115,12 +91,14 @@ public class Instagram {
 		ArrayList<HashMap<String, String>> hashList = new ArrayList<>();
 		try {
 
-			JSONObject output = calling.hitAuth(entity.getAccTokenApi(appId, appSecret) + token, "GET", errorRepo, appId +  " - Submit");
+			JSONObject output = calling.hitAuth(entity.getAccTokenApi(appId, appSecret) + token, "GET", errorRepo,
+					appId + " - Submit");
 			accToken = output.getString("access_token");
 
 			try {
 
-				JSONObject outputAcc = calling.hitAuth(entity.GET_ACC_ID_API + accToken, "GET", errorRepo, appId +  " - Submit");
+				JSONObject outputAcc = calling.hitAuth(entity.GET_ACC_ID_API + accToken, "GET", errorRepo,
+						appId + " - Submit");
 				JSONArray igData = outputAcc.getJSONArray("data");
 				if (outputAcc != null) {
 					for (int i = 0; i < igData.length(); i++) {
@@ -199,19 +177,19 @@ public class Instagram {
 		List<DataEntry> dataEntry = dataRepo.findByCifAccountId(accountId);
 
 		Flag flagging = flagRepo.findByCifAccountId(accountId);
-		
+
 		List<DataEntry> willbeDelete = new ArrayList<>();
 		boolean alreadyFull = false;
 		int extCounter = 0;
 
 		System.out.println(dataRepo.count());
-		
+
 		HttpStatus responseCode;
-		
+
 		if (flagging == null) {
 			flagging = newAccountFlag(accountId);
 		}
-		
+
 		if (flagging.getCifStatus().equals(FlagStatus.REAUTH.toString())) {
 			responseCode = HttpStatus.UNAUTHORIZED;
 		} else {
@@ -246,8 +224,8 @@ public class Instagram {
 			}
 
 			if (dataRepo.count() <= 2) {
-				ThreadingTicket ticketThread = new ThreadingTicket(accountId, token, option, flagRepo, lastRepo, dataRepo,
-						intervalRepo, errorRepo);
+				ThreadingTicket ticketThread = new ThreadingTicket(accountId, token, option, flagRepo, lastRepo,
+						dataRepo, intervalRepo, errorRepo);
 				ticketThread.start();
 			} else {
 				System.out.println("===== Still too many rows at DB =====");
@@ -257,7 +235,7 @@ public class Instagram {
 
 		return new ResponseEntity<Object>(response, responseCode);
 	}
-	
+
 	public Flag newAccountFlag(String accountId) {
 		Flag flagging = flagRepo.save(new Flag(0, accountId, FlagStatus.NEW, 0, 3));
 		return flagging;
