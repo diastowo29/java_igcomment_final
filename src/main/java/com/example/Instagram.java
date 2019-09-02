@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -54,6 +55,9 @@ public class Instagram {
 	IntervalRepository intervalRepo;
 	@Autowired
 	ErrorLogsRepository errorRepo;
+	
+	@Value("${heroku.env.name}")
+	private String heroku_url;
 
 	Entity entity = new Entity();
 	String RETURNURL = "";
@@ -87,17 +91,17 @@ public class Instagram {
 	 * System.out.println("/post"); RETURNURL = paramMap.get("return_url");
 	 * System.out.println(RETURNURL); return "preadmin"; }
 	 */
+	
+	@RequestMapping("/testis/")
+	String getHerokuName() {
+		return heroku_url;
+	}
 
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE,
 			MediaType.APPLICATION_JSON_UTF8_VALUE }, produces = { MediaType.APPLICATION_ATOM_XML_VALUE,
 					MediaType.APPLICATION_JSON_UTF8_VALUE })
 	String indexPost(@RequestParam Map<String, String> paramMap, Model model) {
 		RETURNURL = paramMap.get("return_url");
-
-		/*
-		 * model.addAttribute("appId", entity.APP_ID); model.addAttribute("appSecret",
-		 * entity.APP_SECRET);
-		 */
 		model.addAttribute("callbackUrl", entity.CALLBACKURL);
 		return "preadmin";
 	}
