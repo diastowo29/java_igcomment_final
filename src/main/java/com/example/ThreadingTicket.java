@@ -114,7 +114,7 @@ public class ThreadingTicket extends Thread {
 							flagging.setCifInterval(flagging.getCifInterval() + 1);
 							flagRepo.save(flagging);
 							System.out
-									.println("===== WAIT FOR INTERVAL: " + (flagging.getCifInterval() + 1) + " =====");
+									.println("===== WAIT FOR INTERVAL: " + (flagging.getCifInterval()) + " =====");
 						}
 					}
 				} else if (flagging.getCifStatus().equals(FlagStatus.REAUTH.toString())) {
