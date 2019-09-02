@@ -55,9 +55,6 @@ public class Instagram {
 	IntervalRepository intervalRepo;
 	@Autowired
 	ErrorLogsRepository errorRepo;
-	
-	@Value("${heroku.env.name}")
-	private String heroku_url;
 
 	Entity entity = new Entity();
 	String RETURNURL = "";
@@ -91,11 +88,6 @@ public class Instagram {
 	 * System.out.println("/post"); RETURNURL = paramMap.get("return_url");
 	 * System.out.println(RETURNURL); return "preadmin"; }
 	 */
-	
-	@RequestMapping("/testis/")
-	String getHerokuName() {
-		return heroku_url;
-	}
 
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE,
 			MediaType.APPLICATION_JSON_UTF8_VALUE }, produces = { MediaType.APPLICATION_ATOM_XML_VALUE,
