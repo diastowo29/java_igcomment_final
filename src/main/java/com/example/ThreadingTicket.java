@@ -11,11 +11,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.example.model.DataEntry;
+import com.example.model.ErrorLogs;
 import com.example.model.Flag;
 import com.example.model.Interval;
 import com.example.model.LastEntry;
 import com.example.others.FlagStatus;
+import com.example.others.ResponseCode;
 import com.example.repo.DataEntryRepository;
+import com.example.repo.ErrorLogsRepository;
 import com.example.repo.FlagRepository;
 import com.example.repo.IntervalRepository;
 import com.example.repo.LastEntryRepository;
@@ -30,11 +33,13 @@ public class ThreadingTicket extends Thread {
 	LastEntryRepository lastRepo;
 	DataEntryRepository dataRepo;
 	IntervalRepository intervalRepo;
+	ErrorLogsRepository errorRepo;
 
 	boolean tooMuchComment = false;
 
 	public ThreadingTicket(String accountId, String token, String option, FlagRepository flagRepo,
-			LastEntryRepository lastRepo, DataEntryRepository dataRepo, IntervalRepository intervalRepo) {
+			LastEntryRepository lastRepo, DataEntryRepository dataRepo, IntervalRepository intervalRepo,
+			ErrorLogsRepository errorRepo) {
 		this.accountId = accountId;
 		this.token = token;
 		this.option = option;
@@ -42,6 +47,7 @@ public class ThreadingTicket extends Thread {
 		this.lastRepo = lastRepo;
 		this.dataRepo = dataRepo;
 		this.intervalRepo = intervalRepo;
+		this.errorRepo = errorRepo;
 	}
 
 	@Override
@@ -49,17 +55,22 @@ public class ThreadingTicket extends Thread {
 		Entity ent = new Entity();
 		long lastRun = 0;
 		Flag flagging = flagRepo.findByCifAccountId(accountId);
+		ErrorLogs errLog = errorRepo.findByCifAccountId(accountId);
 		int intv = 0;
-		if (flagging == null) {
-			flagging = newAccountFlag(accountId);
+		if (flagging.getCifStatus().equals(FlagStatus.NEW.toString())) {
 			Interval interval = intervalRepo.save(new Interval(0, accountId, ent.defaultInterval));
 			lastRepo.save(new LastEntry(0, accountId, new Date().getTime()));
 			try {
-				gettingEntry(FlagStatus.INIT, "0", new Date().getTime(), flagging.getId(), flagging.getCifAccountId(),
-						interval, false, flagging.getCifDayLimit());
-				flagRepo.save(new Flag(flagging.getId(), accountId, FlagStatus.READY, 0, flagging.getCifDayLimit()));
+				gettingEntry(FlagStatus.INIT, "0", new Date().getTime(), flagging, interval, false, errLog);
+				flagging.setCifAccountId(accountId);
+				flagging.setCifStatus(FlagStatus.READY);
+				flagging.setCifInterval(0);
+				flagRepo.save(flagging);
 			} catch (Exception e) {
-				flagRepo.save(new Flag(flagging.getId(), accountId, FlagStatus.READY, 0, flagging.getCifDayLimit()));
+				flagging.setCifAccountId(accountId);
+				flagging.setCifStatus(FlagStatus.READY);
+				flagging.setCifInterval(0);
+				flagRepo.save(flagging);
 			}
 		} else {
 			try {
@@ -72,35 +83,53 @@ public class ThreadingTicket extends Thread {
 						intv = interval.getCifInterval();
 					}
 					if (flagging.getCifInterval() == intv) {
-						flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.WAIT, 0,
-								flagging.getCifDayLimit()));
+
+						flagging.setCifStatus(FlagStatus.WAIT);
+						flagRepo.save(flagging);
+
 						LastEntry lastEntry = lastRepo.findByCifAccountId(accountId);
 						lastRun = lastEntry.getCifLastEntry();
 
-						gettingEntry(FlagStatus.PROCESSED, "0", lastRun, flagging.getId(), flagging.getCifAccountId(),
-								interval, false, flagging.getCifDayLimit());
+						boolean needReauth = gettingEntry(FlagStatus.PROCESSED, "0", lastRun, flagging, interval, false,
+								errLog);
 
-						lastRepo.save(new LastEntry(lastEntry.getId(), accountId, new Date().getTime()));
-						flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0,
-								flagging.getCifDayLimit()));
+						if (needReauth) {
+							System.out.println("===== cif need to be reauth ======");
+							flagging.setCifStatus(FlagStatus.REAUTH);
+							flagging.setCifInterval(2);
+							flagRepo.save(flagging);
+						} else {
+							lastRepo.save(new LastEntry(lastEntry.getId(), accountId, new Date().getTime()));
+							flagging.setCifStatus(FlagStatus.READY);
+							flagging.setCifInterval(0);
+							flagRepo.save(flagging);
+						}
 					} else {
 						if (flagging.getCifInterval() > 2) {
-							flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 2,
-									flagging.getCifDayLimit()));
+							flagging.setCifStatus(FlagStatus.READY);
+							flagging.setCifInterval(2);
+							flagRepo.save(flagging);
 						} else {
-							flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY,
-									(flagging.getCifInterval() + 1), flagging.getCifDayLimit()));
+							flagging.setCifStatus(FlagStatus.READY);
+							flagging.setCifInterval(flagging.getCifInterval() + 1);
+							flagRepo.save(flagging);
 							System.out
 									.println("===== WAIT FOR INTERVAL: " + (flagging.getCifInterval() + 1) + " =====");
 						}
 					}
+				} else if (flagging.getCifStatus().equals(FlagStatus.REAUTH.toString())) {
+					flagging.setCifStatus(FlagStatus.READY);
+					flagging.setCifInterval(2);
+					flagRepo.save(flagging);
 				} else {
 					System.out.println("===== PLEASE WAIT, ITS STILL RUNNING =====");
 				}
 			} catch (Exception e) {
 				e.getLocalizedMessage();
-				flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0,
-						flagging.getCifDayLimit()));
+
+				flagging.setCifStatus(FlagStatus.READY);
+				flagging.setCifInterval(0);
+				flagRepo.save(flagging);
 			}
 		}
 
@@ -113,8 +142,8 @@ public class ThreadingTicket extends Thread {
 		return flagging;
 	}
 
-	public void gettingEntry(FlagStatus flagStatus, String nextUrl, long lastRun, long flagId, String flagAccountId,
-			Interval interval, boolean tooMuchComment, int flagDayLimit) throws IOException {
+	public boolean gettingEntry(FlagStatus flagStatus, String nextUrl, long lastRun, Flag flagging, Interval interval,
+			boolean tooMuchComment, ErrorLogs errLog) throws IOException {
 		HitApi calling = new HitApi();
 		Entity ent = new Entity();
 		JSONObject allMedia = new JSONObject();
@@ -122,6 +151,7 @@ public class ThreadingTicket extends Thread {
 		int commentLimit = 198;
 
 		boolean thatsAll = false;
+		boolean needReauth = false;
 
 		String apiUrl = "";
 		HashMap<String, Object> extObj = new HashMap<>();
@@ -137,221 +167,277 @@ public class ThreadingTicket extends Thread {
 			}
 
 			try {
-				allMedia = calling.hit(apiUrl, "GET");
+				allMedia = calling.hit(apiUrl, "GET", errorRepo, accountId, errLog);
 			} catch (RuntimeException e) {
 				e.printStackTrace();
-				flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.READY, 0, flagDayLimit));
+				flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0,
+						flagging.getCifDayLimit()));
 			}
+			if (allMedia.has("failed_status")) {
+				if (allMedia.get("code").toString().equals(ResponseCode.BAD_REQUEST.toString())) {
+					needReauth = true;
+				}
+			} else {
+				if (allMedia.has("data")) {
+					for (int i = 0; i < allMedia.getJSONArray("data").length(); i++) {
+						extResource = new ArrayList<>();
+						Date postDate = sdf
+								.parse(allMedia.getJSONArray("data").getJSONObject(i).getString("timestamp"));
 
-			if (allMedia.has("data")) {
-				for (int i = 0; i < allMedia.getJSONArray("data").length(); i++) {
-					extResource = new ArrayList<>();
-					Date postDate = sdf.parse(allMedia.getJSONArray("data").getJSONObject(i).getString("timestamp"));
+						/*
+						 * ZonedDateTime zdt =
+						 * ZonedDateTime.parse(allMedia.getJSONArray("data").getJSONObject(i)
+						 * .getString("timestamp").replace("+0000", "Z")); LocalDateTime ldt =
+						 * zdt.toLocalDateTime();
+						 * 
+						 * System.out.println(allMedia.getJSONArray("data").getJSONObject(i).getString(
+						 * "timestamp")); System.out.println(ldt);
+						 */
 
-					/*
-					 * ZonedDateTime zdt =
-					 * ZonedDateTime.parse(allMedia.getJSONArray("data").getJSONObject(i)
-					 * .getString("timestamp").replace("+0000", "Z")); LocalDateTime ldt =
-					 * zdt.toLocalDateTime();
-					 * 
-					 * System.out.println(allMedia.getJSONArray("data").getJSONObject(i).getString(
-					 * "timestamp")); System.out.println(ldt);
-					 */
+						long diff = (lastRun) - (postDate.getTime());
+						/*
+						 * long diffHours = diff / (60 * 60 * 1000);
+						 * 
+						 * long diffSeconds = diff / 1000 % 60; long diffMinutes = diff / (60 * 1000) %
+						 * 60; long diffHours = diff / (60 * 60 * 1000) % 24;
+						 */
+						long diffDays = diff / (24 * 60 * 60 * 1000);
 
-					long diff = (lastRun) - (postDate.getTime());
-					/*
-					 * long diffHours = diff / (60 * 60 * 1000);
-					 * 
-					 * long diffSeconds = diff / 1000 % 60; long diffMinutes = diff / (60 * 1000) %
-					 * 60; long diffHours = diff / (60 * 60 * 1000) % 24;
-					 */
-					long diffDays = diff / (24 * 60 * 60 * 1000);
+						if (diffDays <= flagging.getCifDayLimit()) {
+							System.out.println("===== NEW ARRAY IS COMMING =====");
+							String parentMedia = allMedia.getJSONArray("data").getJSONObject(i).getString("id") + "-"
+									+ accountId;
+							HashMap<String, String> author = new HashMap<>();
 
-					if (diffDays <= flagDayLimit) {
-						System.out.println("===== NEW ARRAY IS COMMING =====");
-						String parentMedia = allMedia.getJSONArray("data").getJSONObject(i).getString("id") + "-"
-								+ accountId;
-						HashMap<String, String> author = new HashMap<>();
-
-						if (allMedia.getJSONArray("data").getJSONObject(i).getInt("comments_count") > 500) {
-							tooMuchComment = true;
-						}
-
-						author.put("external_id", "cif-user-" + allMedia.getJSONArray("data").getJSONObject(i)
-								.getJSONObject("owner").getString("username") + "-" + accountId);
-						author.put("name", allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("owner")
-								.getString("username"));
-						extObj = new HashMap<>();
-						extObj.put("external_id", "cif-media-" + parentMedia);
-						try {
-							extObj.put("message", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));	
-						} catch (JSONException e) {
-							extObj.put("message", "Post without caption");
-						}
-						extObj.put("created_at", allMedia.getJSONArray("data").getJSONObject(i).getString("timestamp")
-								.replace("+0000", "Z"));
-
-						HashMap<String, String> displayObject = new HashMap<>();
-						HashMap<String, Object> displayInfo = new HashMap<>();
-						ArrayList<Object> displayArray = new ArrayList<>();
-						ArrayList<Object> fieldsArray = new ArrayList<>();
-						ArrayList<String> tagsArray = new ArrayList<>();
-
-						displayObject.put("media_url",
-								allMedia.getJSONArray("data").getJSONObject(i).getString("media_url"));
-						displayInfo.put("type", "cif-media-" + parentMedia);
-						displayInfo.put("data", displayObject);
-						displayArray.add(displayInfo);
-						displayObject = new HashMap<>();
-						displayInfo = new HashMap<>();
-						try {
-							displayObject.put("media_caption", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
-						} catch (JSONException e) {
-							displayObject.put("media_caption", "Post without caption");
-						}
-						displayInfo.put("type", "cif-caption-" + parentMedia);
-						displayInfo.put("data", displayObject);
-						displayArray.add(displayInfo);
-
-						extObj.put("display_info", displayArray);
-						extObj.put("author", author);
-						extObj.put("allow_channelback", true);
-
-						tagsArray.add("ig_" + allMedia.getJSONArray("data").getJSONObject(i).getString("id"));
-						HashMap<String, Object> fieldsObj = new HashMap<>();
-						fieldsObj.put("id", "tags");
-						fieldsObj.put("value", tagsArray);
-						fieldsArray.add(fieldsObj);
-						fieldsObj = new HashMap<>();
-						fieldsObj.put("id", "external_id");
-						fieldsObj.put("value", "cif-user-" + allMedia.getJSONArray("data").getJSONObject(i)
-								.getJSONObject("owner").getString("username") + "-" + accountId);
-						fieldsArray.add(fieldsObj);
-						extObj.put("fields", fieldsArray);
-
-						extResource.add(extObj);
-						if (allMedia.getJSONArray("data").getJSONObject(i).has("comments")) {
-							// boolean gotAllComment = false;
-							for (int j = 0; j < allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("comments")
-									.getJSONArray("data").length(); j++) {
-								boolean continueExt = false;
-								JSONObject mediaJson = allMedia.getJSONArray("data").getJSONObject(i)
-										.getJSONObject("comments");
-
-								continueExt = checkForContinue(flagStatus,
-										allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("comments")
-												.getJSONArray("data").getJSONObject(j).getString("timestamp"),
-										lastRun);
-
-								extResource = extractData(allMedia, i, mediaJson, j, displayObject, displayInfo,
-										displayArray, fieldsArray, tagsArray, author, option, accountId, extObj,
-										parentMedia, extResource, continueExt);
-
-								if (extResource.size() >= commentLimit) {
-									doSaveDb(0, accountId,
-											allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
-											extResource);
-									extResource = new ArrayList<>();
-								}
+							if (allMedia.getJSONArray("data").getJSONObject(i).getInt("comments_count") > 500) {
+								tooMuchComment = true;
 							}
-							String pageUrl = "";
-							if (allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("comments")
-									.has("paging")) {
+
+							author.put("external_id", "cif-user-" + allMedia.getJSONArray("data").getJSONObject(i)
+									.getJSONObject("owner").getString("username") + "-" + accountId);
+							author.put("name", allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("owner")
+									.getString("username"));
+							extObj = new HashMap<>();
+							extObj.put("external_id", "cif-media-" + parentMedia);
+							try {
+								extObj.put("message", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
+							} catch (Exception e) {
+								extObj.put("message", "Post without caption");
+							}
+							extObj.put("created_at", allMedia.getJSONArray("data").getJSONObject(i)
+									.getString("timestamp").replace("+0000", "Z"));
+
+							HashMap<String, String> displayObject = new HashMap<>();
+							HashMap<String, Object> displayInfo = new HashMap<>();
+							ArrayList<Object> displayArray = new ArrayList<>();
+							ArrayList<Object> fieldsArray = new ArrayList<>();
+							ArrayList<String> tagsArray = new ArrayList<>();
+
+							displayObject.put("media_url",
+									allMedia.getJSONArray("data").getJSONObject(i).getString("media_url"));
+							displayInfo.put("type", "cif-media-" + parentMedia);
+							displayInfo.put("data", displayObject);
+							displayArray.add(displayInfo);
+							displayObject = new HashMap<>();
+							displayInfo = new HashMap<>();
+							try {
+								displayObject.put("media_caption", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
+							} catch (JSONException e) {
+								displayObject.put("media_caption", "Post without caption");	
+							}
+							displayInfo.put("type", "cif-caption-" + parentMedia);
+							displayInfo.put("data", displayObject);
+							displayArray.add(displayInfo);
+
+							extObj.put("display_info", displayArray);
+							extObj.put("author", author);
+							extObj.put("allow_channelback", true);
+
+							tagsArray.add("ig_" + allMedia.getJSONArray("data").getJSONObject(i).getString("id"));
+							HashMap<String, Object> fieldsObj = new HashMap<>();
+							fieldsObj.put("id", "tags");
+							fieldsObj.put("value", tagsArray);
+							fieldsArray.add(fieldsObj);
+							fieldsObj = new HashMap<>();
+							fieldsObj.put("id", "external_id");
+							fieldsObj
+									.put("value",
+											"cif-user-"
+													+ allMedia.getJSONArray("data").getJSONObject(i)
+															.getJSONObject("owner").getString("username")
+													+ "-" + accountId);
+							fieldsArray.add(fieldsObj);
+							extObj.put("fields", fieldsArray);
+
+							extResource.add(extObj);
+							if (allMedia.getJSONArray("data").getJSONObject(i).has("comments")) {
+								// boolean gotAllComment = false;
+								for (int j = 0; j < allMedia.getJSONArray("data").getJSONObject(i)
+										.getJSONObject("comments").getJSONArray("data").length(); j++) {
+									boolean continueExt = false;
+									JSONObject mediaJson = allMedia.getJSONArray("data").getJSONObject(i)
+											.getJSONObject("comments");
+
+									continueExt = checkForContinue(flagStatus,
+											allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("comments")
+													.getJSONArray("data").getJSONObject(j).getString("timestamp"),
+											lastRun);
+
+									extResource = extractData(allMedia, i, mediaJson, j, displayObject, displayInfo,
+											displayArray, fieldsArray, tagsArray, author, option, accountId, extObj,
+											parentMedia, extResource, continueExt);
+
+									if (extResource.size() >= commentLimit) {
+										doSaveDb(0, accountId,
+												allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
+												extResource);
+										extResource = new ArrayList<>();
+									}
+								}
+								String pageUrl = "";
 								if (allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("comments")
-										.getJSONObject("paging").has("next")) {
-									try {
-										pageUrl = allMedia.getJSONArray("data").getJSONObject(i)
-												.getJSONObject("comments").getJSONObject("paging").getString("next");
+										.has("paging")) {
+									if (allMedia.getJSONArray("data").getJSONObject(i).getJSONObject("comments")
+											.getJSONObject("paging").has("next")) {
+										try {
+											pageUrl = allMedia.getJSONArray("data").getJSONObject(i)
+													.getJSONObject("comments").getJSONObject("paging")
+													.getString("next");
 
-										JSONObject mediaPaging = getPaging(pageUrl, flagId, flagAccountId);
-										for (int p = 0; p < mediaPaging.getJSONArray("data").length(); p++) {
-											boolean continueExt = false;
+											JSONObject mediaPaging = getPaging(pageUrl, flagging.getId(),
+													flagging.getCifAccountId(), errLog);
+											if (mediaPaging.has("failed_status")) {
+												if (mediaPaging.get("code").toString()
+														.equals(ResponseCode.BAD_REQUEST.toString())) {
+													/*
+													 * flagRepo.save(new Flag(flagging.getId(),
+													 * flagging.getCifAccountId(), FlagStatus.REAUTH, 0,
+													 * flagging.getCifDayLimit()));
+													 */
 
-											continueExt = checkForContinue(flagStatus, mediaPaging.getJSONArray("data")
-													.getJSONObject(p).getString("timestamp"), lastRun);
+													needReauth = true;
+												}
+											} else {
+												for (int p = 0; p < mediaPaging.getJSONArray("data").length(); p++) {
+													boolean continueExt = false;
 
-											extResource = extractData(allMedia, i, mediaPaging, p, displayObject,
-													displayInfo, displayArray, fieldsArray, tagsArray, author, option,
-													accountId, extObj, parentMedia, extResource, continueExt);
+													continueExt = checkForContinue(flagStatus,
+															mediaPaging.getJSONArray("data").getJSONObject(p)
+																	.getString("timestamp"),
+															lastRun);
 
-											if (extResource.size() >= commentLimit) {
-												doSaveDb(0, accountId,
-														allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
-														extResource);
-												extResource = new ArrayList<>();
-											}
-										}
-										while (mediaPaging.has("paging")) {
-											if (mediaPaging.getJSONObject("paging").has("next")) {
-												try {
-													mediaPaging = getPaging(
-															mediaPaging.getJSONObject("paging").getString("next"),
-															flagId, flagAccountId);
-													for (int p = 0; p < mediaPaging.getJSONArray("data")
-															.length(); p++) {
-														boolean continueExt = false;
+													extResource = extractData(allMedia, i, mediaPaging, p,
+															displayObject, displayInfo, displayArray, fieldsArray,
+															tagsArray, author, option, accountId, extObj, parentMedia,
+															extResource, continueExt);
 
-														continueExt = checkForContinue(
-																flagStatus, mediaPaging.getJSONArray("data")
-																		.getJSONObject(p).getString("timestamp"),
-																lastRun);
+													if (extResource.size() >= commentLimit) {
+														doSaveDb(0, accountId, allMedia.getJSONArray("data")
+																.getJSONObject(i).getString("id"), extResource);
+														extResource = new ArrayList<>();
+													}
+												}
+												while (mediaPaging.has("paging")) {
+													if (mediaPaging.getJSONObject("paging").has("next")) {
+														try {
+															mediaPaging = getPaging(
+																	mediaPaging.getJSONObject("paging")
+																			.getString("next"),
+																	flagging.getId(), flagging.getCifAccountId(), errLog);
+															if (mediaPaging.has("failed_status")) {
+																if (mediaPaging.get("code").toString()
+																		.equals(ResponseCode.BAD_REQUEST.toString())) {
+																	/*
+																	 * flagRepo.save(new Flag(flagging.getId(),
+																	 * flagging.getCifAccountId(), FlagStatus.REAUTH, 0,
+																	 * flagging.getCifDayLimit()));
+																	 */
 
-														extResource = extractData(allMedia, i, mediaPaging, p,
-																displayObject, displayInfo, displayArray, fieldsArray,
-																tagsArray, author, option, accountId, extObj,
-																parentMedia, extResource, continueExt);
+																	needReauth = true;
+																}
+															} else {
+																for (int p = 0; p < mediaPaging.getJSONArray("data")
+																		.length(); p++) {
+																	boolean continueExt = false;
 
-														if (extResource.size() >= commentLimit) {
-															doSaveDb(
-																	0, accountId, allMedia.getJSONArray("data")
-																			.getJSONObject(i).getString("id"),
-																	extResource);
-															extResource = new ArrayList<>();
+																	continueExt = checkForContinue(flagStatus,
+																			mediaPaging.getJSONArray("data")
+																					.getJSONObject(p)
+																					.getString("timestamp"),
+																			lastRun);
+
+																	extResource = extractData(allMedia, i, mediaPaging,
+																			p, displayObject, displayInfo, displayArray,
+																			fieldsArray, tagsArray, author, option,
+																			accountId, extObj, parentMedia, extResource,
+																			continueExt);
+
+																	if (extResource.size() >= commentLimit) {
+																		doSaveDb(0, accountId,
+																				allMedia.getJSONArray("data")
+																						.getJSONObject(i)
+																						.getString("id"),
+																				extResource);
+																		extResource = new ArrayList<>();
+																	}
+																}
+															}
+														} catch (RuntimeException e) {
+															e.printStackTrace();
+
+															flagging.setCifStatus(FlagStatus.READY);
+															flagging.setCifInterval(0);
+															flagRepo.save(flagging);
+															
 														}
 													}
-												} catch (RuntimeException e) {
-													e.printStackTrace();
-													flagRepo.save(new Flag(flagId, flagAccountId, FlagStatus.READY, 0,
-															flagDayLimit));
 												}
 											}
+										} catch (RuntimeException e) {
+											e.printStackTrace();
+
+											flagging.setCifStatus(FlagStatus.READY);
+											flagging.setCifInterval(0);
+											flagRepo.save(flagging);
+											
 										}
-									} catch (RuntimeException e) {
-										e.printStackTrace();
-										flagRepo.save(
-												new Flag(flagId, flagAccountId, FlagStatus.READY, 0, flagDayLimit));
 									}
 								}
 							}
-						}
-						try {
 
-							doSaveDb(0, accountId, allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
-									extResource);
-							extResource = new ArrayList<>();
-							
-						} catch (NullPointerException e) {
-							doSaveDb(0, accountId, allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
-									extResource);
-							extResource = new ArrayList<>();
+							try {
+								doSaveDb(0, accountId, allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
+										extResource);
+								extResource = new ArrayList<>();
+
+							} catch (NullPointerException e) {
+								doSaveDb(0, accountId, allMedia.getJSONArray("data").getJSONObject(i).getString("id"),
+										extResource);
+								extResource = new ArrayList<>();
+							}
+						} else {
+							thatsAll = true;
 						}
-					} else {
-						thatsAll = true;
 					}
 				}
-			}
-			if (!thatsAll) {
-				if (allMedia.has("paging")) {
-					if (allMedia.getJSONObject("paging").has("next")) {
-						gettingEntry(flagStatus, allMedia.getJSONObject("paging").getString("next"), lastRun, flagId,
-								flagAccountId, interval, tooMuchComment, flagDayLimit);
-					}
+				if (!needReauth) {
+					if (!thatsAll) {
+						if (allMedia.has("paging")) {
+							if (allMedia.getJSONObject("paging").has("next")) {
+								gettingEntry(flagStatus, allMedia.getJSONObject("paging").getString("next"), lastRun,
+										flagging, interval, tooMuchComment, errLog);
+							}
+						}
+					}	
 				}
 			}
 
-		} catch (Exception e) {
+		} catch (JSONException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
 			e.printStackTrace();
 		}
+		return needReauth;
 	}
 
 	private void doSaveDb(long i, String accountId, String id, ArrayList<Object> extResource) {
@@ -380,10 +466,10 @@ public class ThreadingTicket extends Thread {
 		return continueExt;
 	}
 
-	public JSONObject getPaging(String url, long flagId, String flagAccountId) {
+	public JSONObject getPaging(String url, long flagId, String flagAccountId, ErrorLogs errLog) {
 		JSONObject mediaPaging = new JSONObject();
 		HitApi api = new HitApi();
-		mediaPaging = api.hit(url, "GET");
+		mediaPaging = api.hit(url, "GET", errorRepo, accountId, errLog);
 		return mediaPaging;
 	}
 

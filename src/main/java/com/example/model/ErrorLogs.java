@@ -46,6 +46,18 @@ public class ErrorLogs implements Serializable {
 	public String getStacktrace() {
 		return stacktrace;
 	}
+	
+	public void setCifAccountId(String cifAccountId) {
+		this.cifAccountId = cifAccountId;
+	}
+	
+	public void setCause(String cause) {
+		this.cause = cause;
+	}
+	
+	public void setStacktrace(String stacktrace) {
+		this.stacktrace = stacktrace;
+	}
 
 	protected ErrorLogs() {
 
