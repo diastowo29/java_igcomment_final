@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.example.model.Comments;
 import com.example.repo.CommentRepository;
 
 @Controller
@@ -58,11 +57,5 @@ public class Webhook {
 		System.out.println(request);
 		System.out.println();
 		return new ResponseEntity<String>("", HttpStatus.OK);
-	}
-
-	@RequestMapping(value = "/update")
-	public ResponseEntity<String> testingUpdate() {
-		commentRepo.save(new Comments(3, "123455", "4567789", "cobain lagi ahhhhh", "", "123456", "", ""));
-		return new ResponseEntity<String>("OK", HttpStatus.OK);
 	}
 }
