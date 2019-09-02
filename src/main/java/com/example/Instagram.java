@@ -343,24 +343,4 @@ public class Instagram {
 		System.out.println(parameter);
 		return new ResponseEntity<String>(HttpStatus.OK);
 	}
-
-	@RequestMapping("/testing")
-	String testingMethod(@RequestParam(name = "name", defaultValue = "dias") String name, Model model) {
-		ArrayList<HashMap<String, String>> list = new ArrayList<>();
-
-		HashMap<String, String> hashMap = new HashMap<>();
-		hashMap.put("name", "amizah");
-		hashMap.put("id", "1");
-		list.add(hashMap);
-
-		hashMap = new HashMap<>();
-		hashMap.put("name", "diastowo");
-		hashMap.put("id", "2");
-		list.add(hashMap);
-
-		model.addAttribute("namelist", list);
-
-		return "testing";
-	}
-
 }
