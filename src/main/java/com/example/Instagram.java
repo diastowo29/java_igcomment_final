@@ -97,7 +97,6 @@ public class Instagram {
 			accToken = output.getString("access_token");
 
 			try {
-
 				JSONObject outputAcc = calling.hitAuth(entity.GET_ACC_ID_API + accToken, "GET", errorRepo,
 						appId + " - Submit");
 				JSONArray igData = outputAcc.getJSONArray("data");
@@ -131,7 +130,6 @@ public class Instagram {
 		System.out.println("/submittoken");
 		HashMap<String, String> hashMap = new HashMap<>();
 		hashMap.put("returnUrl", RETURNURL);
-		System.out.println("RETURN URL: " + RETURNURL);
 		hashMap.put("igId", igId);
 		System.out.println("igName: " + igName);
 		try {
@@ -238,7 +236,7 @@ public class Instagram {
 	}
 
 	public Flag newAccountFlag(String accountId) {
-		Flag flagging = flagRepo.save(new Flag(0, accountId, FlagStatus.NEW, 0, 3));
+		Flag flagging = flagRepo.save(new Flag(0, accountId, FlagStatus.NEW, 0, 3, 0));
 		return flagging;
 	}
 
