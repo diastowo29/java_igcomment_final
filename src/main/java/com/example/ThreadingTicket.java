@@ -113,8 +113,7 @@ public class ThreadingTicket extends Thread {
 							flagging.setCifStatus(FlagStatus.READY);
 							flagging.setCifInterval(flagging.getCifInterval() + 1);
 							flagRepo.save(flagging);
-							System.out
-									.println("===== WAIT FOR INTERVAL: " + (flagging.getCifInterval()) + " =====");
+							System.out.println("===== WAIT FOR INTERVAL: " + (flagging.getCifInterval()) + " =====");
 						}
 					}
 				} else if (flagging.getCifStatus().equals(FlagStatus.REAUTH.toString())) {
@@ -138,7 +137,7 @@ public class ThreadingTicket extends Thread {
 	}
 
 	public Flag newAccountFlag(String accountId) {
-		Flag flagging = flagRepo.save(new Flag(0, accountId, FlagStatus.WAIT, 0, 3));
+		Flag flagging = flagRepo.save(new Flag(0, accountId, FlagStatus.WAIT, 0, 3, 0));
 		return flagging;
 	}
 
@@ -170,8 +169,10 @@ public class ThreadingTicket extends Thread {
 				allMedia = calling.hit(apiUrl, "GET", errorRepo, accountId, errLog);
 			} catch (RuntimeException e) {
 				e.printStackTrace();
-				flagRepo.save(new Flag(flagging.getId(), flagging.getCifAccountId(), FlagStatus.READY, 0,
-						flagging.getCifDayLimit()));
+				flagging.setCifStatus(FlagStatus.READY);
+				flagging.setCifInterval(0);
+				flagging.setCifWaitCounter(0);
+				flagRepo.save(flagging);
 			}
 			if (allMedia.has("failed_status")) {
 				if (allMedia.get("code").toString().equals(ResponseCode.BAD_REQUEST.toString())) {
@@ -220,7 +221,8 @@ public class ThreadingTicket extends Thread {
 							extObj = new HashMap<>();
 							extObj.put("external_id", "cif-media-" + parentMedia);
 							try {
-								extObj.put("message", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
+								extObj.put("message",
+										allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
 							} catch (Exception e) {
 								extObj.put("message", "Post without caption");
 							}
@@ -241,9 +243,10 @@ public class ThreadingTicket extends Thread {
 							displayObject = new HashMap<>();
 							displayInfo = new HashMap<>();
 							try {
-								displayObject.put("media_caption", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
+								displayObject.put("media_caption",
+										allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
 							} catch (JSONException e) {
-								displayObject.put("media_caption", "Post without caption");	
+								displayObject.put("media_caption", "Post without caption");
 							}
 							displayInfo.put("type", "cif-caption-" + parentMedia);
 							displayInfo.put("data", displayObject);
@@ -343,7 +346,8 @@ public class ThreadingTicket extends Thread {
 															mediaPaging = getPaging(
 																	mediaPaging.getJSONObject("paging")
 																			.getString("next"),
-																	flagging.getId(), flagging.getCifAccountId(), errLog);
+																	flagging.getId(), flagging.getCifAccountId(),
+																	errLog);
 															if (mediaPaging.has("failed_status")) {
 																if (mediaPaging.get("code").toString()
 																		.equals(ResponseCode.BAD_REQUEST.toString())) {
@@ -388,7 +392,7 @@ public class ThreadingTicket extends Thread {
 															flagging.setCifStatus(FlagStatus.READY);
 															flagging.setCifInterval(0);
 															flagRepo.save(flagging);
-															
+
 														}
 													}
 												}
@@ -399,7 +403,7 @@ public class ThreadingTicket extends Thread {
 											flagging.setCifStatus(FlagStatus.READY);
 											flagging.setCifInterval(0);
 											flagRepo.save(flagging);
-											
+
 										}
 									}
 								}
@@ -428,7 +432,7 @@ public class ThreadingTicket extends Thread {
 										flagging, interval, tooMuchComment, errLog);
 							}
 						}
-					}	
+					}
 				}
 			}
 
@@ -503,7 +507,7 @@ public class ThreadingTicket extends Thread {
 		try {
 			displayObject.put("media_caption", allMedia.getJSONArray("data").getJSONObject(i).getString("caption"));
 		} catch (JSONException e) {
-			displayObject.put("media_caption", "Post without caption");	
+			displayObject.put("media_caption", "Post without caption");
 		}
 		displayInfo.put("type", "cif-caption-" + parentMedia);
 		displayInfo.put("data", displayObject);
