@@ -96,7 +96,6 @@ public class Instagram {
 			accToken = output.getString("access_token");
 
 			try {
-
 				JSONObject outputAcc = calling.hitAuth(entity.GET_ACC_ID_API + accToken, "GET", errorRepo,
 						appId + " - Submit");
 				JSONArray igData = outputAcc.getJSONArray("data");
@@ -130,7 +129,6 @@ public class Instagram {
 		System.out.println("/submittoken");
 		HashMap<String, String> hashMap = new HashMap<>();
 		hashMap.put("returnUrl", RETURNURL);
-		System.out.println("RETURN URL: " + RETURNURL);
 		hashMap.put("igId", igId);
 		System.out.println("igName: " + igName);
 		try {
@@ -189,7 +187,7 @@ public class Instagram {
 		if (flagging == null) {
 			flagging = newAccountFlag(accountId);
 		}
-
+		
 		if (flagging.getCifStatus().equals(FlagStatus.REAUTH.toString())) {
 			responseCode = HttpStatus.UNAUTHORIZED;
 		} else {
