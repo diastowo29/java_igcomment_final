@@ -121,7 +121,7 @@ public class ThreadingTicket extends Thread {
 					flagging.setCifInterval(2);
 					flagRepo.save(flagging);
 				} else {
-					if (flagging.getCifWaitCounter() >= 2) {
+					if (flagging.getCifWaitCounter() >= ent.MAXWAIT) {
 						flagging.setCifWaitCounter(0);
 						flagging.setCifStatus(FlagStatus.READY);
 					} else {
