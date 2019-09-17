@@ -121,6 +121,13 @@ public class ThreadingTicket extends Thread {
 					flagging.setCifInterval(2);
 					flagRepo.save(flagging);
 				} else {
+					if (flagging.getCifWaitCounter() >= 2) {
+						flagging.setCifWaitCounter(0);
+						flagging.setCifStatus(FlagStatus.READY);
+					} else {
+						flagging.setCifWaitCounter(flagging.getCifWaitCounter() + 1);
+					}
+					flagRepo.save(flagging);
 					System.out.println("===== PLEASE WAIT, ITS STILL RUNNING =====");
 				}
 			} catch (Exception e) {
