@@ -212,7 +212,7 @@ public class ThreadingTicket extends Thread {
 						long diffDays = diff / (24 * 60 * 60 * 1000);
 
 						if (diffDays <= flagging.getCifDayLimit()) {
-							System.out.println("===== NEW ARRAY IS COMMING =====");
+							System.out.println("===== Getting post: " + i + " =====");
 							String parentMedia = allMedia.getJSONArray("data").getJSONObject(i).getString("id") + "-"
 									+ accountId;
 							HashMap<String, String> author = new HashMap<>();

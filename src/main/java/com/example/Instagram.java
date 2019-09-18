@@ -207,7 +207,8 @@ public class Instagram {
 						}
 					}
 					if (extResourceRest.size() > 0) {
-						System.out.println("===== UPDATE DB WITH ID: " + dataEntry.get(i).getId() + " =====");
+						// System.out.println("===== UPDATE DB WITH ID: " + dataEntry.get(i).getId() + "
+						// =====");
 						doSaveDataEntryDb(dataEntry.get(i).getId(), dataEntry.get(i).getCifAccountId(),
 								dataEntry.get(i).getCifPostId(), extResourceRest);
 						extResourceRest = new ArrayList<>();
