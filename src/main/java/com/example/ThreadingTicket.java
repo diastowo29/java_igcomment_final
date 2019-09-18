@@ -139,7 +139,7 @@ public class ThreadingTicket extends Thread {
 			}
 		}
 
-		System.out.println("===== THREAD FINISHED with Account id: " + accountId + " =====");
+		System.out.println("===== " + accountId + " Finished =====");
 		return;
 	}
 
