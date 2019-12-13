@@ -276,7 +276,7 @@ public class Instagram {
 		}
 
 		HashMap<String, String> newHash = new HashMap<>();
-		newHash.put("hostname", hostname);
+//		newHash.put("hostname", hostname);
 
 		return new ResponseEntity<Object>(newHash, HttpStatus.OK);
 	}
