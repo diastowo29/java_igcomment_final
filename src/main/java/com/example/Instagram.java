@@ -1,8 +1,10 @@
 package com.example;
 
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -206,7 +208,8 @@ public class Instagram {
 						}
 					}
 					if (extResourceRest.size() > 0) {
-						System.out.println("===== UPDATE DB WITH ID: " + dataEntry.get(i).getId() + " =====");
+						// System.out.println("===== UPDATE DB WITH ID: " + dataEntry.get(i).getId() + "
+						// =====");
 						doSaveDataEntryDb(dataEntry.get(i).getId(), dataEntry.get(i).getCifAccountId(),
 								dataEntry.get(i).getCifPostId(), extResourceRest);
 						extResourceRest = new ArrayList<>();
@@ -260,6 +263,22 @@ public class Instagram {
 
 		hashMap.put("urls", urlMap);
 		return new ResponseEntity<Object>(hashMap, HttpStatus.OK);
+	}
+
+	@RequestMapping("/testing")
+	ResponseEntity<Object> testingOnly() {
+		InetAddress hostname;
+		try {
+			hostname = InetAddress.getLocalHost();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		HashMap<String, String> newHash = new HashMap<>();
+//		newHash.put("hostname", hostname);
+
+		return new ResponseEntity<Object>(newHash, HttpStatus.OK);
 	}
 
 	/* FIXME CHANNELBACK */

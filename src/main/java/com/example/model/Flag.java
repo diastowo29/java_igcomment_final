@@ -32,10 +32,10 @@ public class Flag implements Serializable {
 
 	@Column(name = "cif_interval")
 	private int cifInterval;
-	
+
 	@Column(name = "cif_daylimit")
 	private int cifDayLimit;
-	
+
 	@Column(name = "cif_waitcounter")
 	private int cifWaitCounter;
 
@@ -50,44 +50,45 @@ public class Flag implements Serializable {
 	public String getCifStatus() {
 		return cifStatus;
 	}
-	
+
 	public int getCifInterval() {
 		return cifInterval;
 	}
-	
+
 	public int getCifDayLimit() {
 		return cifDayLimit;
 	}
-	
+
 	public int getCifWaitCounter() {
 		return cifWaitCounter;
 	}
-	
+
 	public void setCifAccountId(String cifAccountId) {
 		this.cifAccountId = cifAccountId;
 	}
-	
+
 	public void setCifStatus(FlagStatus cifStatus) {
 		this.cifStatus = cifStatus.toString();
 	}
-	
+
 	public void setCifInterval(int cifInterval) {
 		this.cifInterval = cifInterval;
 	}
-	
+
 	public void setCifDayLimit(int cifDayLimit) {
 		this.cifDayLimit = cifDayLimit;
 	}
-	
+
 	public void setCifWaitCounter(int cifWaitCounter) {
 		this.cifWaitCounter = cifWaitCounter;
 	}
-	
+
 	protected Flag() {
 
 	}
 
-	public Flag(long id, String cifAccountId, FlagStatus cifStatus, int cifInterval, int cifDayLimit, int cifWaitCounter) {
+	public Flag(long id, String cifAccountId, FlagStatus cifStatus, int cifInterval, int cifDayLimit,
+			int cifWaitCounter) {
 		if (id != 0) {
 			this.id = id;
 		}

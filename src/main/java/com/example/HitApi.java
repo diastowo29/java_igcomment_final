@@ -26,6 +26,7 @@ public class HitApi {
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod(method);
 			conn.setRequestProperty("Accept", "application/json");
+
 			if (conn.getResponseCode() != 200) {
 				System.out.println("HTTP ERROR:");
 				System.out.println(conn.getResponseMessage());
@@ -40,7 +41,7 @@ public class HitApi {
 				response = new JSONObject().put("failed_status", "error")
 						.put("code", String.valueOf(conn.getResponseCode())).put("message", conn.getResponseMessage());
 			}
-			System.out.println("Output from Server .... \n");
+//			System.out.println("Output from Server .... \n");
 			BufferedReader rd = new BufferedReader(
 					new InputStreamReader(conn.getInputStream(), Charset.forName("UTF-8")));
 			String jsonText = readUser(rd);
@@ -88,7 +89,7 @@ public class HitApi {
 				response = new JSONObject().put("failed_status", "error")
 						.put("code", String.valueOf(conn.getResponseCode())).put("message", conn.getResponseMessage());
 			}
-			System.out.println("Output from Server .... \n");
+//			System.out.println("Output from Server .... \n");
 			BufferedReader rd = new BufferedReader(
 					new InputStreamReader(conn.getInputStream(), Charset.forName("UTF-8")));
 			String jsonText = readUser(rd);
@@ -97,11 +98,11 @@ public class HitApi {
 			conn.disconnect();
 
 		} catch (MalformedURLException e) {
-			
+
 		} catch (IOException e) {
-			
+
 		} catch (JSONException e) {
-			
+
 		}
 
 		return response;
