@@ -20,12 +20,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 import com.example.repo.CommentRepository;
 import com.example.repo.IntervalRepository;
 
 @SpringBootApplication
-public class Main implements CommandLineRunner {
+public class Main extends SpringBootServletInitializer implements CommandLineRunner {
 
 	@Autowired
 	CommentRepository commentRepo;
@@ -42,5 +44,10 @@ public class Main implements CommandLineRunner {
 		// commentRepo.deleteAll();
 		// intervalRepo.deleteAll();
 		// intervalRepo.save(new Interval(0, "17841402968277029", 2));
+	}
+
+	@Override
+	protected SpringApplicationBuilder configure(SpringApplicationBuilder app) {
+		return app.sources(Main.class);
 	}
 }
