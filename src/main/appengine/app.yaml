@@ -1,7 +1,7 @@
 runtime: java
 env: flex
 
-service: library
+service: default
 
 handlers:
 - url: /.*
