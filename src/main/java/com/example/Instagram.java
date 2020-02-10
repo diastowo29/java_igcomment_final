@@ -1,10 +1,8 @@
 package com.example;
 
 import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -96,6 +94,7 @@ public class Instagram {
 			JSONObject output = calling.hitAuth(entity.getAccTokenApi(appId, appSecret) + token, "GET", errorRepo,
 					appId + " - Submit");
 			accToken = output.getString("access_token");
+			System.out.println("ACC TOKEN: " + accToken);
 
 			try {
 				JSONObject outputAcc = calling.hitAuth(entity.GET_ACC_ID_API + accToken, "GET", errorRepo,
@@ -183,6 +182,8 @@ public class Instagram {
 		int extCounter = 0;
 
 		System.out.println(dataRepo.count());
+		
+		/* TEST */
 
 		HttpStatus responseCode;
 
@@ -267,13 +268,13 @@ public class Instagram {
 
 	@RequestMapping("/testing")
 	ResponseEntity<Object> testingOnly() {
-		InetAddress hostname;
-		try {
-			hostname = InetAddress.getLocalHost();
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		InetAddress hostname;
+//		try {
+//			hostname = InetAddress.getLocalHost();
+//		} catch (UnknownHostException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
 		HashMap<String, String> newHash = new HashMap<>();
 //		newHash.put("hostname", hostname);
