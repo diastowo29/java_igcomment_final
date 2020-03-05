@@ -94,6 +94,7 @@ public class Instagram {
 			JSONObject output = calling.hitAuth(entity.getAccTokenApi(appId, appSecret) + token, "GET", errorRepo,
 					appId + " - Submit");
 			accToken = output.getString("access_token");
+			System.out.println("ACC TOKEN: " + accToken);
 
 			try {
 				JSONObject outputAcc = calling.hitAuth(entity.GET_ACC_ID_API + accToken, "GET", errorRepo,
@@ -208,7 +209,8 @@ public class Instagram {
 						}
 					}
 					if (extResourceRest.size() > 0) {
-						System.out.println("===== UPDATE DB WITH ID: " + dataEntry.get(i).getId() + " =====");
+						// System.out.println("===== UPDATE DB WITH ID: " + dataEntry.get(i).getId() + "
+						// =====");
 						doSaveDataEntryDb(dataEntry.get(i).getId(), dataEntry.get(i).getCifAccountId(),
 								dataEntry.get(i).getCifPostId(), extResourceRest);
 						extResourceRest = new ArrayList<>();

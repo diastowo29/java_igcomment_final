@@ -7,12 +7,13 @@ public class Entity {
 	public String CALLBACKURL = HEROKUDOMAIN + "instagram/callback";
 	public String FB_API_DOMAIN = "https://graph.facebook.com/v3.3";
 	public String GET_ACC_ID_API = FB_API_DOMAIN + "/me/accounts?fields=connected_instagram_account,name&access_token=";
-	
+
 	public int defaultInterval = 2;
-	public int MAXWAIT = 5;
-	
-	/*public String APP_ID = "";
-	public String APP_SECRET = "";*/
+	public int MAXWAIT = 10;
+
+	/*
+	 * public String APP_ID = ""; public String APP_SECRET = "";
+	 */
 
 	public String getMediaUrl(String accId, String token) {
 		return FB_API_DOMAIN + "/" + accId

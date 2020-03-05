@@ -26,6 +26,8 @@ import com.example.repo.IntervalRepository;
 
 @SpringBootApplication
 public class Main implements CommandLineRunner {
+	
+	/* GCP V2 */
 
 	@Autowired
 	CommentRepository commentRepo;
