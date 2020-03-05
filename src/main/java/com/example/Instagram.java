@@ -162,6 +162,8 @@ public class Instagram {
 
 	@RequestMapping(value = "/pull", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> pullV2(@RequestParam Map<String, String> paramMap) throws JSONException {
+		
+		System.out.println(paramMap);
 
 		Gson gson = new Gson();
 		HashMap<String, Object> response = new HashMap<>();
