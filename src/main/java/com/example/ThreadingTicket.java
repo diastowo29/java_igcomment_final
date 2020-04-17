@@ -173,6 +173,7 @@ public class ThreadingTicket extends Thread {
 			}
 
 			try {
+				System.out.println(apiUrl);
 				allMedia = calling.hit(apiUrl, "GET", errorRepo, accountId, errLog);
 			} catch (RuntimeException e) {
 				e.printStackTrace();
