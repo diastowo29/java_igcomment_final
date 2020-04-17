@@ -258,9 +258,16 @@ public class Instagram {
 		urlMap.put("admin_ui", entity.HEROKUDOMAIN + "instagram/");
 		urlMap.put("pull_url", entity.HEROKUDOMAIN + "instagram/pull");
 		urlMap.put("channelback_url", entity.HEROKUDOMAIN + "instagram/channelback");
-		urlMap.put("clickthrough_url", entity.HEROKUDOMAIN + "instagram/manifest");
+		urlMap.put("clickthrough_url", entity.HEROKUDOMAIN + "instagram/clickthrough");
 
 		hashMap.put("urls", urlMap);
+		return new ResponseEntity<Object>(hashMap, HttpStatus.OK);
+	}
+	
+	@RequestMapping("/clickthrough")
+	ResponseEntity<Object> clickthrough() {
+		System.out.println("/manifest");
+		HashMap<String, Object> hashMap = new HashMap<>();
 		return new ResponseEntity<Object>(hashMap, HttpStatus.OK);
 	}
 
