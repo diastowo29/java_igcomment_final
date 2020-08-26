@@ -89,7 +89,8 @@
 		window.open("https://www.facebook.com/v3.3/dialog/oauth?client_id=" + newAppId
 				+ "&redirect_uri=" + callbackUrl + "&state={\"appId\":\""
 				+ newAppId + "\", \"appSecret\":\"" + newAppSecret + "\"}"
-				+ "&scope=manage_pages,publish_pages,instagram_basic,instagram_manage_comments,pages_show_list", 
+				//+ "&scope=pages_manage_ads,pages_manage_metadata,pages_read_engagement,pages_read_user_content,pages_manage_posts,pages_manage_engagement,instagram_basic,instagram_manage_comments,pages_show_list",
+				+ "scope=pages_show_list,instagram_basic,instagram_manage_comments",
 				'window', 'width=600,height=400');
 	}
 	
