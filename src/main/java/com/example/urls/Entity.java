@@ -3,7 +3,6 @@ package com.example.urls;
 public class Entity {
 
 	public String HEROKUDOMAIN = "https://java-ig-comment-watsons.herokuapp.com/";
-
 	public String CALLBACKURL = HEROKUDOMAIN + "instagram/callback";
 	public String FB_API_DOMAIN = "https://graph.facebook.com/v3.3";
 	public String GET_ACC_ID_API = FB_API_DOMAIN + "/me/accounts?fields=connected_instagram_account,name&access_token=";

@@ -144,6 +144,14 @@ public class Instagram {
 		hashMap.put("metadata",
 				"{\"igId\": \"" + igId + "\", \"token\": \"" + igToken + "\", \"option\": \"" + option + "\"}");
 		hashMap.put("state", "{\"state\":\"testing\"}");
+		
+
+		Flag flagging = flagRepo.findByCifAccountId(igId);
+		try {
+ 			flagRepo.save(new Flag(flagging.getId(), igId, FlagStatus.NEW, flagging.getCifInterval(), flagging.getCifDayLimit(), flagging.getCifWaitCounter()));
+		} catch (NullPointerException e) {
+			System.out.println("Is it new flag ?");
+		}
 
 		model.addAttribute("metadata", hashMap);
 		return "final_submit";
@@ -260,9 +268,16 @@ public class Instagram {
 		urlMap.put("admin_ui", entity.HEROKUDOMAIN + "instagram/");
 		urlMap.put("pull_url", entity.HEROKUDOMAIN + "instagram/pull");
 		urlMap.put("channelback_url", entity.HEROKUDOMAIN + "instagram/channelback");
-		urlMap.put("clickthrough_url", entity.HEROKUDOMAIN + "instagram/manifest");
+		urlMap.put("clickthrough_url", entity.HEROKUDOMAIN + "instagram/clickthrough");
 
 		hashMap.put("urls", urlMap);
+		return new ResponseEntity<Object>(hashMap, HttpStatus.OK);
+	}
+	
+	@RequestMapping("/clickthrough")
+	ResponseEntity<Object> clickthrough() {
+		System.out.println("/manifest");
+		HashMap<String, Object> hashMap = new HashMap<>();
 		return new ResponseEntity<Object>(hashMap, HttpStatus.OK);
 	}
 
