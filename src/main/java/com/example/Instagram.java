@@ -144,6 +144,12 @@ public class Instagram {
 		hashMap.put("metadata",
 				"{\"igId\": \"" + igId + "\", \"token\": \"" + igToken + "\", \"option\": \"" + option + "\"}");
 		hashMap.put("state", "{\"state\":\"testing\"}");
+		
+
+		Flag flagging = flagRepo.findByCifAccountId(igId);
+		if (flagging != null) {
+			flagRepo.save(new Flag(flagging.getId(), igId, FlagStatus.NEW, flagging.getCifInterval(), flagging.getCifDayLimit(), flagging.getCifWaitCounter()));
+		}
 
 		model.addAttribute("metadata", hashMap);
 		return "final_submit";
