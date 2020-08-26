@@ -147,8 +147,10 @@ public class Instagram {
 		
 
 		Flag flagging = flagRepo.findByCifAccountId(igId);
-		if (flagging != null) {
-			flagRepo.save(new Flag(flagging.getId(), igId, FlagStatus.NEW, flagging.getCifInterval(), flagging.getCifDayLimit(), flagging.getCifWaitCounter()));
+		try {
+ 			flagRepo.save(new Flag(flagging.getId(), igId, FlagStatus.NEW, flagging.getCifInterval(), flagging.getCifDayLimit(), flagging.getCifWaitCounter()));
+		} catch (NullPointerException e) {
+			System.out.println("Is it new flag ?");
 		}
 
 		model.addAttribute("metadata", hashMap);
