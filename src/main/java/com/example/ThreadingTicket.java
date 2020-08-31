@@ -137,6 +137,7 @@ public class ThreadingTicket extends Thread {
 			} catch (Exception e) {
 				
 				System.out.println("===== ERROR =====");
+				e.printStackTrace();
 				e.getLocalizedMessage();
 
 				flagging.setCifStatus(FlagStatus.READY);
