@@ -56,6 +56,10 @@ public class ThreadingTicket extends Thread {
 		long lastRun = 0;
 		Flag flagging = flagRepo.findByCifAccountId(accountId);
 		ErrorLogs errLog = errorRepo.findByCifAccountId(accountId);
+		
+		System.out.println("THREAD RUN");
+		System.out.println("CIF STATUS " + flagging.getCifStatus());
+		
 		int intv = 0;
 		if (flagging.getCifStatus().equals(FlagStatus.NEW.toString())) {
 			Interval interval = intervalRepo.save(new Interval(0, accountId, ent.defaultInterval));
@@ -131,6 +135,8 @@ public class ThreadingTicket extends Thread {
 					System.out.println("===== PLEASE WAIT, ITS STILL RUNNING =====");
 				}
 			} catch (Exception e) {
+				
+				System.out.println("===== ERROR =====");
 				e.getLocalizedMessage();
 
 				flagging.setCifStatus(FlagStatus.READY);
