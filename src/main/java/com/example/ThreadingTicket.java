@@ -163,6 +163,8 @@ public class ThreadingTicket extends Thread {
 		HashMap<String, Object> extObj = new HashMap<>();
 		ArrayList<Object> extResource = new ArrayList<>();
 
+		System.out.println("GETTING ENTRY");
+		
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -171,6 +173,8 @@ public class ThreadingTicket extends Thread {
 			} else {
 				apiUrl = nextUrl;
 			}
+			
+			System.out.println(apiUrl);
 
 			try {
 				System.out.println(apiUrl);

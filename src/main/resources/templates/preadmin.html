@@ -79,25 +79,25 @@
 	<script src="/webjars/jquery/1.9.1/jquery.min.js"></script>
 	<script src="/webjars/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 	<script type="text/javascript">
-	var newAppId = "";
-	var newAppSecret = "";
-	
-	function goPopUp(callbackUrl){
-		newAppId = document.getElementById('appId').value;
-		newAppSecret = document.getElementById('appSecret').value;
+		var newAppId = "";
+		var newAppSecret = "";
 		
-		window.open("https://www.facebook.com/v3.3/dialog/oauth?client_id=" + newAppId
-				+ "&redirect_uri=" + callbackUrl + "&state={\"appId\":\""
-				+ newAppId + "\", \"appSecret\":\"" + newAppSecret + "\"}"
-				//+ "&scope=pages_manage_ads,pages_manage_metadata,pages_read_engagement,pages_read_user_content,pages_manage_posts,pages_manage_engagement,instagram_basic,instagram_manage_comments,pages_show_list",
-				+ "scope=pages_show_list,instagram_basic,instagram_manage_comments",
-				'window', 'width=600,height=400');
-	}
-	
-	function CallParent(code, appId, appSecret) {
-		window.open("../instagram/submit?token=" + code + "&appId=" + appId
-				+ "&appSecret=" + newAppSecret, "_self");
-	}
+		function goPopUp(callbackUrl){
+			newAppId = document.getElementById('appId').value;
+			newAppSecret = document.getElementById('appSecret').value;
+			
+			window.open("https://www.facebook.com/v3.3/dialog/oauth?client_id=" + newAppId
+					+ "&redirect_uri=" + callbackUrl + "&state={\"appId\":\""
+					+ newAppId + "\", \"appSecret\":\"" + newAppSecret + "\"}"
+					//+ "&scope=pages_manage_ads,pages_manage_metadata,pages_read_engagement,pages_read_user_content,pages_manage_posts,pages_manage_engagement,instagram_basic,instagram_manage_comments,pages_show_list",
+					+ "scope=pages_show_list,instagram_basic,instagram_manage_comments",
+					'window', 'width=600,height=400');
+		}
+		
+		function CallParent(code, appId, appSecret) {
+			window.open("../instagram/submit?token=" + code + "&appId=" + appId
+					+ "&appSecret=" + newAppSecret, "_self");
+		}
 	</script>
 	
 </body>
