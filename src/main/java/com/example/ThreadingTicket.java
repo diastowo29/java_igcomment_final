@@ -185,7 +185,7 @@ public class ThreadingTicket extends Thread {
 			System.out.println("IG TOKEN: " + token);
 
 			try {
-				System.out.println(apiUrl);
+//				System.out.println(apiUrl);
 				allMedia = calling.hit(apiUrl, "GET", errorRepo, accountId, errLog);
 			} catch (RuntimeException e) {
 				e.printStackTrace();
