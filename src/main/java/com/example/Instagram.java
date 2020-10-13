@@ -148,7 +148,7 @@ public class Instagram {
 
 		Flag flagging = flagRepo.findByCifAccountId(igId);
 		try {
- 			flagRepo.save(new Flag(flagging.getId(), igId, FlagStatus.NEW, flagging.getCifInterval(), flagging.getCifDayLimit(), flagging.getCifWaitCounter()));
+ 			flagRepo.save(new Flag(flagging.getId(), igId, FlagStatus.READY, flagging.getCifInterval(), flagging.getCifDayLimit(), flagging.getCifWaitCounter()));
 		} catch (NullPointerException e) {
 			System.out.println("Is it new flag ?");
 		}
@@ -195,7 +195,7 @@ public class Instagram {
 		boolean alreadyFull = false;
 		int extCounter = 0;
 
-		System.out.println(dataRepo.count());
+//		System.out.println(dataRepo.count());
 
 		HttpStatus responseCode;
 
