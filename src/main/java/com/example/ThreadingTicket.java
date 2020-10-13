@@ -180,9 +180,6 @@ public class ThreadingTicket extends Thread {
 			} else {
 				apiUrl = nextUrl;
 			}
-			
-			System.out.println("IG ID: " + accountId);
-			System.out.println("IG TOKEN: " + token);
 
 			try {
 //				System.out.println(apiUrl);
