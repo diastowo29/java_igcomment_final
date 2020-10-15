@@ -1,9 +1,13 @@
 package com.example;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -130,7 +134,8 @@ public class Instagram {
 
 	@RequestMapping("/submittoken")
 	String finalSubmit(@RequestParam(name = "getId") String igId, @RequestParam(name = "name") String igName,
-			@RequestParam(name = "token") String igToken, @RequestParam(name = "option") String option, @RequestParam(name = "app_id") String app_id, Model model) {
+			@RequestParam(name = "token") String igToken, @RequestParam(name = "option") String option,
+			@RequestParam(name = "app_id") String app_id, Model model) {
 		System.out.println("/submittoken");
 		HashMap<String, String> hashMap = new HashMap<>();
 		hashMap.put("returnUrl", RETURNURL);
@@ -145,29 +150,38 @@ public class Instagram {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-		
+
 		/* GET TOKEN EXPIRED DATE HERE */
-		
+
 		Unirest.get(entity.getTokenExpDateApi(app_id, igToken)).asJson().ifSuccess(response -> {
-			System.out.println(response.getStatus());
+//			System.out.println(response.getStatus());
 			JsonNode expiredDateObj = response.getBody();
-			System.out.println(expiredDateObj);
+//			System.out.println(expiredDateObj);
+			int secondLeft = expiredDateObj.getObject().getInt("expires_in");
+			int daysLeft = secondLeft/3600/24;
+			
+			Date currentDate = new Date();
+			Calendar c = Calendar.getInstance();
+			c.setTime(currentDate);
+			c.add(Calendar.DATE, daysLeft);
+			
+			System.out.println("TOKEN EXPIRED IN : " + c);
 
 		}).ifFailure(response -> {
 			System.out.println(response.getStatus());
 			System.out.println(response.getStatusText());
 		});
-		
+
 		/* GET TOKEN EXPIRED DATE HERE */
-		
+
 		hashMap.put("metadata",
 				"{\"igId\": \"" + igId + "\", \"token\": \"" + igToken + "\", \"option\": \"" + option + "\"}");
 		hashMap.put("state", "{\"state\":\"testing\"}");
-		
 
 		Flag flagging = flagRepo.findByCifAccountId(igId);
 		try {
- 			flagRepo.save(new Flag(flagging.getId(), igId, FlagStatus.READY, flagging.getCifInterval(), flagging.getCifDayLimit(), flagging.getCifWaitCounter()));
+			flagRepo.save(new Flag(flagging.getId(), igId, FlagStatus.READY, flagging.getCifInterval(),
+					flagging.getCifDayLimit(), flagging.getCifWaitCounter()));
 		} catch (NullPointerException e) {
 			System.out.println("Is it new flag ?");
 		}
@@ -190,7 +204,7 @@ public class Instagram {
 
 	@RequestMapping(value = "/pull", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> pullV2(@RequestParam Map<String, String> paramMap) throws JSONException {
-		
+
 //		System.out.println(paramMap);
 
 		Gson gson = new Gson();
@@ -201,7 +215,6 @@ public class Instagram {
 		String accountId = jobject.getString("igId");
 		String token = jobject.getString("token");
 		String option = jobject.getString("option");
-		
 
 		System.out.println("IG ID: " + accountId);
 		System.out.println("IG TOKEN: " + token);
@@ -296,7 +309,7 @@ public class Instagram {
 		hashMap.put("urls", urlMap);
 		return new ResponseEntity<Object>(hashMap, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping("/clickthrough")
 	ResponseEntity<Object> clickthrough() {
 		System.out.println("/manifest");
