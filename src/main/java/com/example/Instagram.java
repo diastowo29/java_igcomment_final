@@ -165,7 +165,7 @@ public class Instagram {
 			c.setTime(currentDate);
 			c.add(Calendar.DATE, daysLeft);
 			
-			System.out.println("TOKEN EXPIRED IN : " + c);
+			System.out.println("TOKEN EXPIRED IN : " + c.getTime());
 
 		}).ifFailure(response -> {
 			System.out.println(response.getStatus());
