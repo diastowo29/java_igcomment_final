@@ -36,6 +36,9 @@ import com.example.repo.LastEntryRepository;
 import com.example.urls.Entity;
 import com.google.gson.Gson;
 
+import kong.unirest.JsonNode;
+import kong.unirest.Unirest;
+
 @Controller
 @SpringBootApplication
 @CrossOrigin
@@ -126,7 +129,7 @@ public class Instagram {
 
 	@RequestMapping("/submittoken")
 	String finalSubmit(@RequestParam(name = "getId") String igId, @RequestParam(name = "name") String igName,
-			@RequestParam(name = "token") String igToken, @RequestParam(name = "option") String option, Model model) {
+			@RequestParam(name = "token") String igToken, @RequestParam(name = "option") String option, @RequestParam(name = "app_id") String app_id, Model model) {
 		System.out.println("/submittoken");
 		HashMap<String, String> hashMap = new HashMap<>();
 		hashMap.put("returnUrl", RETURNURL);
@@ -141,6 +144,21 @@ public class Instagram {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
+		
+		/* GET TOKEN EXPIRED DATE HERE */
+		
+		Unirest.get(entity.getTokenExpDateApi(app_id, igToken)).asJson().ifSuccess(response -> {
+			System.out.println(response.getStatus());
+			JsonNode expiredDateObj = response.getBody();
+			System.out.println(expiredDateObj);
+
+		}).ifFailure(response -> {
+			System.out.println(response.getStatus());
+			System.out.println(response.getStatusText());
+		});
+		
+		/* GET TOKEN EXPIRED DATE HERE */
+		
 		hashMap.put("metadata",
 				"{\"igId\": \"" + igId + "\", \"token\": \"" + igToken + "\", \"option\": \"" + option + "\"}");
 		hashMap.put("state", "{\"state\":\"testing\"}");
