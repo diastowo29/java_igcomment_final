@@ -108,6 +108,7 @@ public class Instagram {
 						hashMap = new HashMap<>();
 						if (igData.getJSONObject(i).has("connected_instagram_account")) {
 							hashMap.put("name", igData.getJSONObject(i).getString("name"));
+							hashMap.put("app_id", appId);
 							hashMap.put("id", igData.getJSONObject(i).getJSONObject("connected_instagram_account")
 									.getString("id"));
 							hashMap.put("token", accToken);
