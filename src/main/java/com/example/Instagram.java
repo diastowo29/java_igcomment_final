@@ -1,10 +1,8 @@
 package com.example;
 
 import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -158,13 +156,13 @@ public class Instagram {
 			JsonNode expiredDateObj = response.getBody();
 //			System.out.println(expiredDateObj);
 			int secondLeft = expiredDateObj.getObject().getInt("expires_in");
-			int daysLeft = secondLeft/3600/24;
-			
+			int daysLeft = secondLeft / 3600 / 24;
+
 			Date currentDate = new Date();
 			Calendar c = Calendar.getInstance();
 			c.setTime(currentDate);
 			c.add(Calendar.DATE, daysLeft);
-			
+
 			System.out.println("TOKEN EXPIRED IN : " + c.getTime());
 
 		}).ifFailure(response -> {
