@@ -26,6 +26,7 @@ public class Entity {
 	}
 
 	public String replyComment(String commentId, String message, String token) {
+		System.out.println(FB_API_DOMAIN + "/" + commentId + "/replies?message=" + message + "&access_token=" + token);
 		return FB_API_DOMAIN + "/" + commentId + "/replies?message=" + message + "&access_token=" + token;
 	}
 
