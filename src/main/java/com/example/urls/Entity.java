@@ -2,7 +2,7 @@ package com.example.urls;
 
 public class Entity {
 
-	public String HEROKUDOMAIN = "https://3879ad1f49a5.ngrok.io/";
+	public String HEROKUDOMAIN = "https://39cee9ab6382.ngrok.io/";
 	public String CALLBACKURL = HEROKUDOMAIN + "instagram/callback";
 	public String FB_API_DOMAIN = "https://graph.facebook.com/v3.3";
 	public String GET_ACC_ID_API = FB_API_DOMAIN + "/me/accounts?fields=connected_instagram_account,name&access_token=";
