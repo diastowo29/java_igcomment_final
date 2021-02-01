@@ -85,7 +85,6 @@ public class Instagram {
 			model.addAttribute("app_id", metaObject.get("app_id").toString());
 			model.addAttribute("app_secret", metaObject.get("app_secret").toString());
 		} else {
-
 			model.addAttribute("email", "");
 			model.addAttribute("app_id", "");
 			model.addAttribute("app_secret", "");
