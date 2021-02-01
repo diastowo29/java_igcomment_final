@@ -63,12 +63,11 @@ public class ThreadingTicket extends Thread {
 		
 		System.out.println("THREAD RUN");
 		System.out.println("CIF STATUS " + flagging.getCifStatus());
-		Mailer mail = new Mailer();
-		if (willExpired) {
-			if (flagging.getCifMailCounter() >= 720 || flagging.getCifMailCounter() == 0) {
-				mail.sendEmail();
-			}
-		}
+//		Mailer mail = new Mailer();
+		/*
+		 * if (willExpired) { if (flagging.getCifMailCounter() >= 720 ||
+		 * flagging.getCifMailCounter() == 0) { mail.sendEmail(); } }
+		 */
 		
 		int intv = 0;
 		if (flagging.getCifStatus().equals(FlagStatus.NEW.toString())) {

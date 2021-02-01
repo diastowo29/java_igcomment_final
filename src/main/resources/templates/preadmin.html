@@ -71,13 +71,13 @@
 				placeholder="Input App Secret here.."
 				th:value="${app_secret}">
 		</div>
-		<div class="form-group">
+		<!-- <div class="form-group">
 			<label for="email">Notification Recipient:</label> 
 			<input id="appEmailNotif" type="email"
 				class="form-control" name="appEmailNotif"
 				placeholder="email@example.com"
 				th:value="${email}">
-		</div>
+		</div> -->
 
 		<button class="loginBtn loginBtn--facebook" th:onclick="@{'goPopUp(\'' + ${callbackUrl} + '\')'}">
 		  Login with Facebook
@@ -105,7 +105,7 @@
 		
 		function parentToCall(code, appId, appSecret) {
 			window.open("../instagram/submit?token=" + code + "&appId=" + appId
-					+ "&appSecret=" + newAppSecret + "&email=" + emailRecipient, "_self");
+					+ "&appSecret=" + newAppSecret, "_self");
 		}
 	</script>
 	

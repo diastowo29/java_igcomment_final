@@ -103,11 +103,11 @@ public class Instagram {
 
 	@RequestMapping("/submit")
 	String submitToken(@RequestParam("token") String token, @RequestParam("appId") String appId,
-			@RequestParam("appSecret") String appSecret, @RequestParam("email") String email, Model model) {
+			@RequestParam("appSecret") String appSecret, /* @RequestParam("email") String email, */ Model model) {
 		System.out.println("GET SUBMIT TOKEN: " + token);
 		System.out.println("GET APP ID: " + appId);
 		System.out.println("GET APP SECRET: " + appSecret);
-		System.out.println("GET EMAIL: " + email);
+//		System.out.println("GET EMAIL: " + email);
 		String accToken = "";
 		HitApi calling = new HitApi();
 
@@ -134,7 +134,7 @@ public class Instagram {
 							hashMap.put("id", igData.getJSONObject(i).getJSONObject("connected_instagram_account")
 									.getString("id"));
 							hashMap.put("token", accToken);
-							hashMap.put("email", email);
+//							hashMap.put("email", email);
 							hashList.add(hashMap);
 						}
 					}
@@ -155,12 +155,12 @@ public class Instagram {
 	String finalSubmit(@RequestParam(name = "getId") String igId, @RequestParam(name = "name") String igName,
 			@RequestParam(name = "token") String igToken, @RequestParam(name = "option") String option,
 			@RequestParam(name = "app_id") String app_id, @RequestParam(name = "app_secret") String app_secret,
-			@RequestParam(name = "email") String email, Model model) {
+			/* @RequestParam(name = "email") String email, */Model model) {
 		HashMap<String, String> hashMap = new HashMap<>();
 		hashMap.put("returnUrl", RETURNURL);
 		hashMap.put("igId", igId);
 		System.out.println("igName: " + igName);
-		System.out.println("email: " + email);
+//		System.out.println("email: " + email);
 		try {
 			if (option.equals("1")) {
 				hashMap.put("name", "Instagram - " + URLDecoder.decode(igName, "UTF-8") + " - Post to Ticket");
@@ -200,7 +200,7 @@ public class Instagram {
 		metadata.put("app_secret", app_secret);
 		metadata.put("token", igToken);
 		metadata.put("option", option);
-		metadata.put("email", email);
+//		metadata.put("email", email);
 		metadata.put("exp_date", sb.toString());
 
 		hashMap.put("metadata", metadata.toString());
