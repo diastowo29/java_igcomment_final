@@ -81,7 +81,7 @@ public class Instagram {
 
 		if (!metadata.isEmpty()) {
 			JSONObject metaObject = new JSONObject(metadata);
-			model.addAttribute("email", metaObject.get("email").toString());
+//			model.addAttribute("email", metaObject.get("email").toString());
 			model.addAttribute("app_id", metaObject.get("app_id").toString());
 			model.addAttribute("app_secret", metaObject.get("app_secret").toString());
 		} else {
