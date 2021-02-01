@@ -247,20 +247,20 @@ public class Instagram {
 
 		System.out.println("IG ID: " + accountId);
 		System.out.println("IG TOKEN: " + token);
-		System.out.println("EXPIRED DATE: " + jobject.getString("exp_date"));
-		System.out.println("MAIL RECIPIENT: " + mailRecipient);
+//		System.out.println("EXPIRED DATE: " + jobject.getString("exp_date"));
+//		System.out.println("MAIL RECIPIENT: " + mailRecipient);
 
 		long longDate = Long.parseLong(jobject.getString("exp_date"));
 		Date expiredDate = new Date();
 		expiredDate.setTime(longDate);
 
-		System.out.println(expiredDate);
+//		System.out.println(expiredDate);
 
 		Date currentDate = new Date();
 
 		long diff = expiredDate.getTime() - currentDate.getTime();
 		long daysLeft = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
-		System.out.println(daysLeft);
+//		System.out.println(daysLeft);
 
 		if (daysLeft < 14) {
 			willExpired = true;
