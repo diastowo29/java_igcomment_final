@@ -63,14 +63,21 @@
 		<div class="form-group">
 			<label for="usr">App ID:</label> <input id="appId" type="text"
 				class="form-control" name="appId" placeholder="Input App ID here.."
-				value="">
+				th:value="${app_id}">
 		</div>
 		<div class="form-group">
 			<label for="pwd">App Secret:</label> <input id="appSecret" type="password"
 				class="form-control" name="appSecret"
 				placeholder="Input App Secret here.."
-				value="">
+				th:value="${app_secret}">
 		</div>
+		<!-- <div class="form-group">
+			<label for="email">Notification Recipient:</label> 
+			<input id="appEmailNotif" type="email"
+				class="form-control" name="appEmailNotif"
+				placeholder="email@example.com"
+				th:value="${email}">
+		</div> -->
 
 		<button class="loginBtn loginBtn--facebook" th:onclick="@{'goPopUp(\'' + ${callbackUrl} + '\')'}">
 		  Login with Facebook
@@ -81,10 +88,12 @@
 	<script type="text/javascript">
 		var newAppId = "";
 		var newAppSecret = "";
+		var emailRecipient = "";
 		
 		function goPopUp(callbackUrl){
 			newAppId = document.getElementById('appId').value;
 			newAppSecret = document.getElementById('appSecret').value;
+			/* emailRecipient = document.getElementById('appEmailNotif').value; */
 			
 			window.open("https://www.facebook.com/v3.3/dialog/oauth?client_id=" + newAppId
 					+ "&redirect_uri=" + callbackUrl + "&state={\"appId\":\""
@@ -94,7 +103,7 @@
 					'window', 'width=600,height=400');
 		}
 		
-		function CallParent(code, appId, appSecret) {
+		function parentToCall(code, appId, appSecret) {
 			window.open("../instagram/submit?token=" + code + "&appId=" + appId
 					+ "&appSecret=" + newAppSecret, "_self");
 		}
