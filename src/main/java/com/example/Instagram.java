@@ -82,8 +82,17 @@ public class Instagram {
 		if (!metadata.isEmpty()) {
 			JSONObject metaObject = new JSONObject(metadata);
 //			model.addAttribute("email", metaObject.get("email").toString());
-			model.addAttribute("app_id", metaObject.get("app_id").toString());
-			model.addAttribute("app_secret", metaObject.get("app_secret").toString());
+			if (metaObject.has("app_id")) {				
+				model.addAttribute("app_id", metaObject.get("app_id").toString());
+			} else {
+				model.addAttribute("app_id", "");
+			}
+			
+			if (metaObject.has("app_secret")) {				
+				model.addAttribute("app_secret", metaObject.get("app_secret").toString());
+			} else {
+				model.addAttribute("app_secret", "");
+			}
 		} else {
 
 			model.addAttribute("email", "");
