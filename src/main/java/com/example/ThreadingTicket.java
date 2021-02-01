@@ -29,6 +29,8 @@ public class ThreadingTicket extends Thread {
 	String accountId;
 	String token;
 	String option;
+	boolean willExpired;
+	String mailRecipient;
 	FlagRepository flagRepo;
 	LastEntryRepository lastRepo;
 	DataEntryRepository dataRepo;
@@ -39,7 +41,7 @@ public class ThreadingTicket extends Thread {
 
 	public ThreadingTicket(String accountId, String token, String option, FlagRepository flagRepo,
 			LastEntryRepository lastRepo, DataEntryRepository dataRepo, IntervalRepository intervalRepo,
-			ErrorLogsRepository errorRepo) {
+			ErrorLogsRepository errorRepo, boolean willExpired, String mailRecipient) {
 		this.accountId = accountId;
 		this.token = token;
 		this.option = option;
@@ -48,6 +50,8 @@ public class ThreadingTicket extends Thread {
 		this.dataRepo = dataRepo;
 		this.intervalRepo = intervalRepo;
 		this.errorRepo = errorRepo;
+		this.willExpired = willExpired;
+		this.mailRecipient = mailRecipient;
 	}
 
 	@Override
@@ -56,6 +60,15 @@ public class ThreadingTicket extends Thread {
 		long lastRun = 0;
 		Flag flagging = flagRepo.findByCifAccountId(accountId);
 		ErrorLogs errLog = errorRepo.findByCifAccountId(accountId);
+		
+		System.out.println("THREAD RUN");
+		System.out.println("CIF STATUS " + flagging.getCifStatus());
+//		Mailer mail = new Mailer();
+		/*
+		 * if (willExpired) { if (flagging.getCifMailCounter() >= 720 ||
+		 * flagging.getCifMailCounter() == 0) { mail.sendEmail(); } }
+		 */
+		
 		int intv = 0;
 		if (flagging.getCifStatus().equals(FlagStatus.NEW.toString())) {
 			Interval interval = intervalRepo.save(new Interval(0, accountId, ent.defaultInterval));
@@ -65,11 +78,13 @@ public class ThreadingTicket extends Thread {
 				flagging.setCifAccountId(accountId);
 				flagging.setCifStatus(FlagStatus.READY);
 				flagging.setCifInterval(0);
+				flagging.setCifMailCounter(0);
 				flagRepo.save(flagging);
 			} catch (Exception e) {
 				flagging.setCifAccountId(accountId);
 				flagging.setCifStatus(FlagStatus.READY);
 				flagging.setCifInterval(0);
+				flagging.setCifMailCounter(0);
 				flagRepo.save(flagging);
 			}
 		} else {
@@ -97,21 +112,49 @@ public class ThreadingTicket extends Thread {
 							System.out.println("===== cif need to be reauth ======");
 							flagging.setCifStatus(FlagStatus.REAUTH);
 							flagging.setCifInterval(2);
+							if (willExpired) {
+								if (flagging.getCifMailCounter() >= 720) {
+									flagging.setCifMailCounter(0);
+								} else {
+									flagging.setCifMailCounter(flagging.getCifMailCounter() + 1);	
+								}
+							}
 							flagRepo.save(flagging);
 						} else {
 							lastRepo.save(new LastEntry(lastEntry.getId(), accountId, new Date().getTime()));
 							flagging.setCifStatus(FlagStatus.READY);
 							flagging.setCifInterval(0);
+							if (willExpired) {
+								if (flagging.getCifMailCounter() >= 720) {
+									flagging.setCifMailCounter(0);
+								} else {
+									flagging.setCifMailCounter(flagging.getCifMailCounter() + 1);	
+								}
+							}
 							flagRepo.save(flagging);
 						}
 					} else {
 						if (flagging.getCifInterval() > 2) {
 							flagging.setCifStatus(FlagStatus.READY);
 							flagging.setCifInterval(2);
+							if (willExpired) {
+								if (flagging.getCifMailCounter() >= 720) {
+									flagging.setCifMailCounter(0);
+								} else {
+									flagging.setCifMailCounter(flagging.getCifMailCounter() + 1);	
+								}
+							}
 							flagRepo.save(flagging);
 						} else {
 							flagging.setCifStatus(FlagStatus.READY);
 							flagging.setCifInterval(flagging.getCifInterval() + 1);
+							if (willExpired) {
+								if (flagging.getCifMailCounter() >= 720) {
+									flagging.setCifMailCounter(0);
+								} else {
+									flagging.setCifMailCounter(flagging.getCifMailCounter() + 1);	
+								}
+							}
 							flagRepo.save(flagging);
 							System.out.println("===== WAIT FOR INTERVAL: " + (flagging.getCifInterval()) + " =====");
 						}
@@ -119,6 +162,7 @@ public class ThreadingTicket extends Thread {
 				} else if (flagging.getCifStatus().equals(FlagStatus.REAUTH.toString())) {
 					flagging.setCifStatus(FlagStatus.READY);
 					flagging.setCifInterval(2);
+					flagging.setCifMailCounter(0);
 					flagRepo.save(flagging);
 				} else {
 					if (flagging.getCifWaitCounter() >= ent.MAXWAIT) {
@@ -127,24 +171,41 @@ public class ThreadingTicket extends Thread {
 					} else {
 						flagging.setCifWaitCounter(flagging.getCifWaitCounter() + 1);
 					}
+					if (willExpired) {
+						if (flagging.getCifMailCounter() >= 720) {
+							flagging.setCifMailCounter(0);
+						} else {
+							flagging.setCifMailCounter(flagging.getCifMailCounter() + 1);	
+						}
+					}
 					flagRepo.save(flagging);
 					System.out.println("===== PLEASE WAIT, ITS STILL RUNNING =====");
 				}
 			} catch (Exception e) {
+				
+				System.out.println("===== ERROR =====");
+				e.printStackTrace();
 				e.getLocalizedMessage();
 
 				flagging.setCifStatus(FlagStatus.READY);
 				flagging.setCifInterval(0);
+				if (willExpired) {
+					if (flagging.getCifMailCounter() >= 720) {
+						flagging.setCifMailCounter(0);
+					} else {
+						flagging.setCifMailCounter(flagging.getCifMailCounter() + 1);	
+					}
+				}
 				flagRepo.save(flagging);
 			}
 		}
-
+		
 		System.out.println("===== " + accountId + " Finished =====");
 		return;
 	}
 
 	public Flag newAccountFlag(String accountId) {
-		Flag flagging = flagRepo.save(new Flag(0, accountId, FlagStatus.WAIT, 0, 3, 0));
+		Flag flagging = flagRepo.save(new Flag(0, accountId, FlagStatus.WAIT, 0, 3, 0, 0));
 		return flagging;
 	}
 
@@ -163,6 +224,8 @@ public class ThreadingTicket extends Thread {
 		HashMap<String, Object> extObj = new HashMap<>();
 		ArrayList<Object> extResource = new ArrayList<>();
 
+		System.out.println("GETTING ENTRY");
+		
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -173,6 +236,7 @@ public class ThreadingTicket extends Thread {
 			}
 
 			try {
+				System.out.println(apiUrl);
 				allMedia = calling.hit(apiUrl, "GET", errorRepo, accountId, errLog);
 			} catch (RuntimeException e) {
 				e.printStackTrace();

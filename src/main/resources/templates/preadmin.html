@@ -63,14 +63,21 @@
 		<div class="form-group">
 			<label for="usr">App ID:</label> <input id="appId" type="text"
 				class="form-control" name="appId" placeholder="Input App ID here.."
-				value="">
+				th:value="${app_id}">
 		</div>
 		<div class="form-group">
 			<label for="pwd">App Secret:</label> <input id="appSecret" type="password"
 				class="form-control" name="appSecret"
 				placeholder="Input App Secret here.."
-				value="">
+				th:value="${app_secret}">
 		</div>
+		<!-- <div class="form-group">
+			<label for="email">Notification Recipient:</label> 
+			<input id="appEmailNotif" type="email"
+				class="form-control" name="appEmailNotif"
+				placeholder="email@example.com"
+				th:value="${email}">
+		</div> -->
 
 		<button class="loginBtn loginBtn--facebook" th:onclick="@{'goPopUp(\'' + ${callbackUrl} + '\')'}">
 		  Login with Facebook
@@ -79,24 +86,27 @@
 	<script src="/webjars/jquery/1.9.1/jquery.min.js"></script>
 	<script src="/webjars/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 	<script type="text/javascript">
-	var newAppId = "";
-	var newAppSecret = "";
-	
-	function goPopUp(callbackUrl){
-		newAppId = document.getElementById('appId').value;
-		newAppSecret = document.getElementById('appSecret').value;
+		var newAppId = "";
+		var newAppSecret = "";
+		var emailRecipient = "";
 		
-		window.open("https://www.facebook.com/v3.3/dialog/oauth?client_id=" + newAppId
-				+ "&redirect_uri=" + callbackUrl + "&state={\"appId\":\""
-				+ newAppId + "\", \"appSecret\":\"" + newAppSecret + "\"}"
-				+ "&scope=manage_pages,publish_pages,instagram_basic,instagram_manage_comments,pages_show_list", 
-				'window', 'width=600,height=400');
-	}
-	
-	function CallParent(code, appId, appSecret) {
-		window.open("../instagram/submit?token=" + code + "&appId=" + appId
-				+ "&appSecret=" + newAppSecret, "_self");
-	}
+		function goPopUp(callbackUrl){
+			newAppId = document.getElementById('appId').value;
+			newAppSecret = document.getElementById('appSecret').value;
+			emailRecipient = document.getElementById('appEmailNotif').value;
+			
+			window.open("https://www.facebook.com/v3.3/dialog/oauth?client_id=" + newAppId
+					+ "&redirect_uri=" + callbackUrl + "&state={\"appId\":\""
+					+ newAppId + "\", \"appSecret\":\"" + newAppSecret + "\"}"
+					//+ "&scope=pages_manage_ads,pages_manage_metadata,pages_read_engagement,pages_read_user_content,pages_manage_posts,pages_manage_engagement,instagram_basic,instagram_manage_comments,pages_show_list",
+					+ "scope=pages_show_list,instagram_basic,instagram_manage_comments",
+					'window', 'width=600,height=400');
+		}
+		
+		function parentToCall(code, appId, appSecret) {
+			window.open("../instagram/submit?token=" + code + "&appId=" + appId
+					+ "&appSecret=" + newAppSecret, "_self");
+		}
 	</script>
 	
 </body>
