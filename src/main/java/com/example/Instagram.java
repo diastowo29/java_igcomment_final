@@ -81,7 +81,7 @@ public class Instagram {
 
 		if (!metadata.isEmpty()) {
 			JSONObject metaObject = new JSONObject(metadata);
-			model.addAttribute("email", metaObject.get("email").toString());
+//			model.addAttribute("email", metaObject.get("email").toString());
 			model.addAttribute("app_id", metaObject.get("app_id").toString());
 			model.addAttribute("app_secret", metaObject.get("app_secret").toString());
 		} else {
@@ -261,7 +261,6 @@ public class Instagram {
 //		long diff = expiredDate.getTime() - currentDate.getTime();
 //		long daysLeft = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
 //		System.out.println(daysLeft);
-//
 //		if (daysLeft < 14) {
 //			willExpired = true;
 //		}
@@ -417,6 +416,9 @@ public class Instagram {
 	
 	public void checkErrorLogs (String accountId) {		
 		List<ErrorLogs> errorLogs = errorRepo.findAll();
-		System.out.println(errorLogs.size());
+//		System.out.println(errorLogs.size());
+		if (errorLogs.size() > 1000) {
+			errorRepo.deleteAll();
+		}
 	}
 }

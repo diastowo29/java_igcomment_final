@@ -30,6 +30,7 @@ public class ThreadingTicket extends Thread {
 	String token;
 	String option;
 	boolean willExpired;
+//	String mailRecipient;
 	FlagRepository flagRepo;
 	LastEntryRepository lastRepo;
 	DataEntryRepository dataRepo;
@@ -40,7 +41,7 @@ public class ThreadingTicket extends Thread {
 
 	public ThreadingTicket(String accountId, String token, String option, FlagRepository flagRepo,
 			LastEntryRepository lastRepo, DataEntryRepository dataRepo, IntervalRepository intervalRepo,
-			ErrorLogsRepository errorRepo, boolean willExpired) {
+			ErrorLogsRepository errorRepo, boolean willExpired/* , String mailRecipient */) {
 		this.accountId = accountId;
 		this.token = token;
 		this.option = option;
@@ -50,6 +51,7 @@ public class ThreadingTicket extends Thread {
 		this.intervalRepo = intervalRepo;
 		this.errorRepo = errorRepo;
 		this.willExpired = willExpired;
+//		this.mailRecipient = mailRecipient;
 	}
 
 	@Override
