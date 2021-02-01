@@ -250,21 +250,21 @@ public class Instagram {
 //		System.out.println("EXPIRED DATE: " + jobject.getString("exp_date"));
 //		System.out.println("MAIL RECIPIENT: " + mailRecipient);
 
-		long longDate = Long.parseLong(jobject.getString("exp_date"));
-		Date expiredDate = new Date();
-		expiredDate.setTime(longDate);
+//		long longDate = Long.parseLong(jobject.getString("exp_date"));
+//		Date expiredDate = new Date();
+//		expiredDate.setTime(longDate);
 
 //		System.out.println(expiredDate);
 
-		Date currentDate = new Date();
-
-		long diff = expiredDate.getTime() - currentDate.getTime();
-		long daysLeft = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
+//		Date currentDate = new Date();
+//
+//		long diff = expiredDate.getTime() - currentDate.getTime();
+//		long daysLeft = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
 //		System.out.println(daysLeft);
-
-		if (daysLeft < 14) {
-			willExpired = true;
-		}
+//
+//		if (daysLeft < 14) {
+//			willExpired = true;
+//		}
 
 		List<DataEntry> dataEntry = dataRepo.findByCifAccountId(accountId);
 
