@@ -30,7 +30,6 @@ public class ThreadingTicket extends Thread {
 	String token;
 	String option;
 	boolean willExpired;
-	String mailRecipient;
 	FlagRepository flagRepo;
 	LastEntryRepository lastRepo;
 	DataEntryRepository dataRepo;
@@ -41,7 +40,7 @@ public class ThreadingTicket extends Thread {
 
 	public ThreadingTicket(String accountId, String token, String option, FlagRepository flagRepo,
 			LastEntryRepository lastRepo, DataEntryRepository dataRepo, IntervalRepository intervalRepo,
-			ErrorLogsRepository errorRepo, boolean willExpired, String mailRecipient) {
+			ErrorLogsRepository errorRepo, boolean willExpired) {
 		this.accountId = accountId;
 		this.token = token;
 		this.option = option;
@@ -51,7 +50,6 @@ public class ThreadingTicket extends Thread {
 		this.intervalRepo = intervalRepo;
 		this.errorRepo = errorRepo;
 		this.willExpired = willExpired;
-		this.mailRecipient = mailRecipient;
 	}
 
 	@Override
@@ -203,12 +201,7 @@ public class ThreadingTicket extends Thread {
 		System.out.println("===== " + accountId + " Finished =====");
 		return;
 	}
-
-	public Flag newAccountFlag(String accountId) {
-		Flag flagging = flagRepo.save(new Flag(0, accountId, FlagStatus.WAIT, 0, 3, 0, 0));
-		return flagging;
-	}
-
+	
 	public boolean gettingEntry(FlagStatus flagStatus, String nextUrl, long lastRun, Flag flagging, Interval interval,
 			boolean tooMuchComment, ErrorLogs errLog) throws IOException {
 		HitApi calling = new HitApi();

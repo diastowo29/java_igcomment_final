@@ -243,7 +243,7 @@ public class Instagram {
 		String accountId = jobject.getString("igId");
 		String token = jobject.getString("token");
 		String option = jobject.getString("option");
-		String mailRecipient = jobject.getString("email");
+//		String mailRecipient = jobject.getString("email");
 
 		System.out.println("IG ID: " + accountId);
 		System.out.println("IG TOKEN: " + token);
@@ -319,7 +319,7 @@ public class Instagram {
 
 			if (dataRepo.count() <= 2) {
 				ThreadingTicket ticketThread = new ThreadingTicket(accountId, token, option, flagRepo, lastRepo,
-						dataRepo, intervalRepo, errorRepo, willExpired, mailRecipient);
+						dataRepo, intervalRepo, errorRepo, willExpired);
 				ticketThread.start();
 			} else {
 				System.out.println("===== Still too many rows at DB =====");
