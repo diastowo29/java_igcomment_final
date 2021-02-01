@@ -93,7 +93,7 @@
 		function goPopUp(callbackUrl){
 			newAppId = document.getElementById('appId').value;
 			newAppSecret = document.getElementById('appSecret').value;
-			emailRecipient = document.getElementById('appEmailNotif').value;
+			/* emailRecipient = document.getElementById('appEmailNotif').value; */
 			
 			window.open("https://www.facebook.com/v3.3/dialog/oauth?client_id=" + newAppId
 					+ "&redirect_uri=" + callbackUrl + "&state={\"appId\":\""
