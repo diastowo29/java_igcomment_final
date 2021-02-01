@@ -344,8 +344,8 @@ public class Instagram {
 	ResponseEntity<Object> manifest() {
 		System.out.println("/manifest");
 		HashMap<String, Object> hashMap = new HashMap<>();
-		hashMap.put("name", "Instagram Comments Connector - Dev");
-		hashMap.put("id", "connector-igcomment-dev");
+		hashMap.put("name", "Instagram Integration Java");
+		hashMap.put("id", "zendesk-internal-instagram-integration-java");
 		hashMap.put("author", "Trees Solutions");
 		hashMap.put("version", "v1.0");
 		HashMap<String, String> urlMap = new HashMap<>();
