@@ -243,28 +243,28 @@ public class Instagram {
 		String accountId = jobject.getString("igId");
 		String token = jobject.getString("token");
 		String option = jobject.getString("option");
-		String mailRecipient = jobject.getString("email");
+//		String mailRecipient = jobject.getString("email");
 
 		System.out.println("IG ID: " + accountId);
 		System.out.println("IG TOKEN: " + token);
 //		System.out.println("EXPIRED DATE: " + jobject.getString("exp_date"));
 //		System.out.println("MAIL RECIPIENT: " + mailRecipient);
 
-		long longDate = Long.parseLong(jobject.getString("exp_date"));
-		Date expiredDate = new Date();
-		expiredDate.setTime(longDate);
+//		long longDate = Long.parseLong(jobject.getString("exp_date"));
+//		Date expiredDate = new Date();
+//		expiredDate.setTime(longDate);
 
 //		System.out.println(expiredDate);
 
-		Date currentDate = new Date();
-
-		long diff = expiredDate.getTime() - currentDate.getTime();
-		long daysLeft = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
+//		Date currentDate = new Date();
+//
+//		long diff = expiredDate.getTime() - currentDate.getTime();
+//		long daysLeft = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
 //		System.out.println(daysLeft);
 
-		if (daysLeft < 14) {
-			willExpired = true;
-		}
+//		if (daysLeft < 14) {
+//			willExpired = true;
+//		}
 
 		List<DataEntry> dataEntry = dataRepo.findByCifAccountId(accountId);
 
@@ -317,7 +317,7 @@ public class Instagram {
 
 			if (dataRepo.count() <= 2) {
 				ThreadingTicket ticketThread = new ThreadingTicket(accountId, token, option, flagRepo, lastRepo,
-						dataRepo, intervalRepo, errorRepo, willExpired, mailRecipient);
+						dataRepo, intervalRepo, errorRepo, willExpired);
 				ticketThread.start();
 			} else {
 				System.out.println("===== Still too many rows at DB =====");
@@ -415,6 +415,9 @@ public class Instagram {
 	
 	public void checkErrorLogs (String accountId) {		
 		List<ErrorLogs> errorLogs = errorRepo.findAll();
-		System.out.println(errorLogs.size());
+//		System.out.println(errorLogs.size());
+		if (errorLogs.size() > 1000) {
+			errorRepo.deleteAll();
+		}
 	}
 }
